@@ -411,8 +411,11 @@ def build(cfg, run, device="cuda"):
     ops = load_ops(run["kernels"])
     model = LlamaModel(cfg, run["seq"], run["attn"], ops, run["ckpt"], run["nvtx"] and not run["compile"]).to(device)
     model.train()
+    # Non-fused rows use the multi tensor (foreach) Adam, set explicitly. With only fused=False this
+    # PyTorch build ran the per parameter loop instead (checked with the profiler), a much slower baseline.
+    adam_impl = dict(fused=True) if run["fused_adam"] else dict(foreach=True)
     opt = torch.optim.AdamW(model.parameters(), lr=run.get("lr", 3e-4), betas=(0.9, 0.95),
-                            weight_decay=0.1, fused=run["fused_adam"])
+                            weight_decay=0.1, **adam_impl)
     fwd = torch.compile(model) if run["compile"] else model
     idx, tgt = make_batch(run["batch"], run["seq"], cfg.vocab, device)
     nvtx = run["nvtx"]
