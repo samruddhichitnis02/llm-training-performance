@@ -10,4 +10,5 @@ profiles/
 build/
 *.so
 logs/
+log/
 .vscode/

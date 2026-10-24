@@ -1,77 +1,53 @@
-[2026-10-23 21:38:34.990] [system::topology::RingTopology] [info] ring of node 0, id: 0 dimension: local total nodes in ring: 8 index in ring: 0 offset: 1 total nodes in ring: 8
-[2026-10-23 21:38:34.990] [system::topology::RingTopology] [info] ring of node 0, id: 0 dimension: local total nodes in ring: 8 index in ring: 0 offset: 1 total nodes in ring: 8
-[2026-10-23 21:38:34.990] [system::topology::RingTopology] [info] ring of node 0, id: 0 dimension: local total nodes in ring: 8 index in ring: 0 offset: 1 total nodes in ring: 8
-[2026-10-23 21:38:34.990] [system::topology::RingTopology] [info] ring of node 0, id: 0 dimension: local total nodes in ring: 8 index in ring: 0 offset: 1 total nodes in ring: 8
-[2026-10-23 21:38:35.040] [system::topology::RingTopology] [info] custom ring, id: 0, dimension: local total nodes in ring: 2 index in ring: 0 total nodes in ring 2
-[2026-10-23 21:38:35.040] [system::topology::RingTopology] [info] custom ring, id: 1, dimension: local total nodes in ring: 2 index in ring: 1 total nodes in ring 2
-[2026-10-23 21:38:35.040] [system::topology::RingTopology] [info] custom ring, id: 4, dimension: local total nodes in ring: 2 index in ring: 0 total nodes in ring 2
-[2026-10-23 21:38:35.040] [system::topology::RingTopology] [info] custom ring, id: 5, dimension: local total nodes in ring: 2 index in ring: 1 total nodes in ring 2
-[2026-10-23 21:38:35.075] [system::topology::RingTopology] [info] custom ring, id: 2, dimension: local total nodes in ring: 2 index in ring: 0 total nodes in ring 2
-[2026-10-23 21:38:35.075] [system::topology::RingTopology] [info] custom ring, id: 3, dimension: local total nodes in ring: 2 index in ring: 1 total nodes in ring 2
-[2026-10-23 21:38:35.075] [system::topology::RingTopology] [info] custom ring, id: 6, dimension: local total nodes in ring: 2 index in ring: 0 total nodes in ring 2
-[2026-10-23 21:38:35.075] [system::topology::RingTopology] [info] custom ring, id: 7, dimension: local total nodes in ring: 2 index in ring: 1 total nodes in ring 2
-[2026-10-23 21:38:35.248] [system::topology::RingTopology] [info] custom ring, id: 2, dimension: local total nodes in ring: 2 index in ring: 0 total nodes in ring 2
-[2026-10-23 21:38:35.248] [system::topology::RingTopology] [info] custom ring, id: 3, dimension: local total nodes in ring: 2 index in ring: 0 total nodes in ring 2
-[2026-10-23 21:38:35.248] [system::topology::RingTopology] [info] custom ring, id: 6, dimension: local total nodes in ring: 2 index in ring: 1 total nodes in ring 2
-[2026-10-23 21:38:35.248] [system::topology::RingTopology] [info] custom ring, id: 7, dimension: local total nodes in ring: 2 index in ring: 1 total nodes in ring 2
-[2026-10-23 21:38:35.296] [system::topology::RingTopology] [info] custom ring, id: 0, dimension: local total nodes in ring: 2 index in ring: 0 total nodes in ring 2
-[2026-10-23 21:38:35.296] [system::topology::RingTopology] [info] custom ring, id: 1, dimension: local total nodes in ring: 2 index in ring: 0 total nodes in ring 2
-[2026-10-23 21:38:35.296] [system::topology::RingTopology] [info] custom ring, id: 4, dimension: local total nodes in ring: 2 index in ring: 1 total nodes in ring 2
-[2026-10-23 21:38:35.296] [system::topology::RingTopology] [info] custom ring, id: 5, dimension: local total nodes in ring: 2 index in ring: 1 total nodes in ring 2
-[2026-10-23 21:38:35.310] [workload] [info] sys[2] finished, 3992904 cycles, exposed communication 2431904 cycles.
-[2026-10-23 21:38:35.310] [statistics] [info] sys[2]. Post statistics processing start.
-[2026-10-23 21:38:35.310] [statistics] [info] sys[2]. Post statistics processing end.
-[2026-10-23 21:38:35.310] [statistics] [info] sys[2], Wall time: 3992904
-[2026-10-23 21:38:35.310] [statistics] [info] sys[2], GPU time: 1561000
-[2026-10-23 21:38:35.310] [statistics] [info] sys[2], Comm time: 2791260
-[2026-10-23 21:38:35.310] [statistics] [info] sys[2], Total compute-communication overlap: 359356
-[2026-10-23 21:38:35.310] [workload] [info] sys[3] finished, 3992904 cycles, exposed communication 2431904 cycles.
-[2026-10-23 21:38:35.310] [statistics] [info] sys[3]. Post statistics processing start.
-[2026-10-23 21:38:35.310] [statistics] [info] sys[3]. Post statistics processing end.
-[2026-10-23 21:38:35.310] [statistics] [info] sys[3], Wall time: 3992904
-[2026-10-23 21:38:35.310] [statistics] [info] sys[3], GPU time: 1561000
-[2026-10-23 21:38:35.310] [statistics] [info] sys[3], Comm time: 2791260
-[2026-10-23 21:38:35.310] [statistics] [info] sys[3], Total compute-communication overlap: 359356
-[2026-10-23 21:38:35.310] [workload] [info] sys[6] finished, 3992904 cycles, exposed communication 2431904 cycles.
-[2026-10-23 21:38:35.310] [statistics] [info] sys[6]. Post statistics processing start.
-[2026-10-23 21:38:35.311] [statistics] [info] sys[6]. Post statistics processing end.
-[2026-10-23 21:38:35.311] [statistics] [info] sys[6], Wall time: 3992904
-[2026-10-23 21:38:35.311] [statistics] [info] sys[6], GPU time: 1561000
-[2026-10-23 21:38:35.311] [statistics] [info] sys[6], Comm time: 2791260
-[2026-10-23 21:38:35.311] [statistics] [info] sys[6], Total compute-communication overlap: 359356
-[2026-10-23 21:38:35.311] [workload] [info] sys[7] finished, 3992904 cycles, exposed communication 2431904 cycles.
-[2026-10-23 21:38:35.311] [statistics] [info] sys[7]. Post statistics processing start.
-[2026-10-23 21:38:35.311] [statistics] [info] sys[7]. Post statistics processing end.
-[2026-10-23 21:38:35.311] [statistics] [info] sys[7], Wall time: 3992904
-[2026-10-23 21:38:35.311] [statistics] [info] sys[7], GPU time: 1561000
-[2026-10-23 21:38:35.311] [statistics] [info] sys[7], Comm time: 2791260
-[2026-10-23 21:38:35.311] [statistics] [info] sys[7], Total compute-communication overlap: 359356
-[2026-10-23 21:38:35.336] [workload] [info] sys[0] finished, 4774692 cycles, exposed communication 3649692 cycles.
-[2026-10-23 21:38:35.336] [statistics] [info] sys[0]. Post statistics processing start.
-[2026-10-23 21:38:35.336] [statistics] [info] sys[0]. Post statistics processing end.
-[2026-10-23 21:38:35.336] [statistics] [info] sys[0], Wall time: 4774692
-[2026-10-23 21:38:35.336] [statistics] [info] sys[0], GPU time: 1125000
-[2026-10-23 21:38:35.336] [statistics] [info] sys[0], Comm time: 4393692
-[2026-10-23 21:38:35.336] [statistics] [info] sys[0], Total compute-communication overlap: 744000
-[2026-10-23 21:38:35.336] [workload] [info] sys[1] finished, 4774692 cycles, exposed communication 3649692 cycles.
-[2026-10-23 21:38:35.336] [statistics] [info] sys[1]. Post statistics processing start.
-[2026-10-23 21:38:35.337] [statistics] [info] sys[1]. Post statistics processing end.
-[2026-10-23 21:38:35.337] [statistics] [info] sys[1], Wall time: 4774692
-[2026-10-23 21:38:35.337] [statistics] [info] sys[1], GPU time: 1125000
-[2026-10-23 21:38:35.337] [statistics] [info] sys[1], Comm time: 4393692
-[2026-10-23 21:38:35.337] [statistics] [info] sys[1], Total compute-communication overlap: 744000
-[2026-10-23 21:38:35.337] [workload] [info] sys[4] finished, 4774692 cycles, exposed communication 3649692 cycles.
-[2026-10-23 21:38:35.337] [statistics] [info] sys[4]. Post statistics processing start.
-[2026-10-23 21:38:35.337] [statistics] [info] sys[4]. Post statistics processing end.
-[2026-10-23 21:38:35.337] [statistics] [info] sys[4], Wall time: 4774692
-[2026-10-23 21:38:35.337] [statistics] [info] sys[4], GPU time: 1125000
-[2026-10-23 21:38:35.337] [statistics] [info] sys[4], Comm time: 4393692
-[2026-10-23 21:38:35.337] [statistics] [info] sys[4], Total compute-communication overlap: 744000
-[2026-10-23 21:38:35.337] [workload] [info] sys[5] finished, 4774692 cycles, exposed communication 3649692 cycles.
-[2026-10-23 21:38:35.337] [statistics] [info] sys[5]. Post statistics processing start.
-[2026-10-23 21:38:35.337] [statistics] [info] sys[5]. Post statistics processing end.
-[2026-10-23 21:38:35.337] [statistics] [info] sys[5], Wall time: 4774692
-[2026-10-23 21:38:35.337] [statistics] [info] sys[5], GPU time: 1125000
-[2026-10-23 21:38:35.337] [statistics] [info] sys[5], Comm time: 4393692
-[2026-10-23 21:38:35.337] [statistics] [info] sys[5], Total compute-communication overlap: 744000
-[2026-10-23 21:38:35.340] [system] [warning] Exiting
+[2026-10-23 21:42:15.144] [system::topology::RingTopology] [info] ring of node 0, id: 0 dimension: local total nodes in ring: 8 index in ring: 0 offset: 1 total nodes in ring: 8
+[2026-10-23 21:42:15.144] [system::topology::RingTopology] [info] ring of node 0, id: 0 dimension: local total nodes in ring: 8 index in ring: 0 offset: 1 total nodes in ring: 8
+[2026-10-23 21:42:15.144] [system::topology::RingTopology] [info] ring of node 0, id: 0 dimension: local total nodes in ring: 8 index in ring: 0 offset: 1 total nodes in ring: 8
+[2026-10-23 21:42:15.144] [system::topology::RingTopology] [info] ring of node 0, id: 0 dimension: local total nodes in ring: 8 index in ring: 0 offset: 1 total nodes in ring: 8
+[2026-10-23 21:42:15.235] [system::topology::RingTopology] [info] custom ring, id: 0, dimension: local total nodes in ring: 2 index in ring: 0 total nodes in ring 2
+[2026-10-23 21:42:15.235] [system::topology::RingTopology] [info] custom ring, id: 1, dimension: local total nodes in ring: 2 index in ring: 1 total nodes in ring 2
+[2026-10-23 21:42:15.236] [system::topology::RingTopology] [info] custom ring, id: 4, dimension: local total nodes in ring: 2 index in ring: 0 total nodes in ring 2
+[2026-10-23 21:42:15.236] [system::topology::RingTopology] [info] custom ring, id: 5, dimension: local total nodes in ring: 2 index in ring: 1 total nodes in ring 2
+[2026-10-23 21:42:15.279] [system::topology::RingTopology] [info] custom ring, id: 2, dimension: local total nodes in ring: 2 index in ring: 0 total nodes in ring 2
+[2026-10-23 21:42:15.279] [system::topology::RingTopology] [info] custom ring, id: 3, dimension: local total nodes in ring: 2 index in ring: 1 total nodes in ring 2
+[2026-10-23 21:42:15.279] [system::topology::RingTopology] [info] custom ring, id: 6, dimension: local total nodes in ring: 2 index in ring: 0 total nodes in ring 2
+[2026-10-23 21:42:15.279] [system::topology::RingTopology] [info] custom ring, id: 7, dimension: local total nodes in ring: 2 index in ring: 1 total nodes in ring 2
+[2026-10-23 21:42:15.485] [system::topology::RingTopology] [info] custom ring, id: 2, dimension: local total nodes in ring: 2 index in ring: 0 total nodes in ring 2
+[2026-10-23 21:42:15.485] [system::topology::RingTopology] [info] custom ring, id: 3, dimension: local total nodes in ring: 2 index in ring: 0 total nodes in ring 2
+[2026-10-23 21:42:15.486] [system::topology::RingTopology] [info] custom ring, id: 6, dimension: local total nodes in ring: 2 index in ring: 1 total nodes in ring 2
+[2026-10-23 21:42:15.486] [system::topology::RingTopology] [info] custom ring, id: 7, dimension: local total nodes in ring: 2 index in ring: 1 total nodes in ring 2
+[2026-10-23 21:42:15.540] [system::topology::RingTopology] [info] custom ring, id: 0, dimension: local total nodes in ring: 2 index in ring: 0 total nodes in ring 2
+[2026-10-23 21:42:15.540] [system::topology::RingTopology] [info] custom ring, id: 1, dimension: local total nodes in ring: 2 index in ring: 0 total nodes in ring 2
+[2026-10-23 21:42:15.541] [system::topology::RingTopology] [info] custom ring, id: 4, dimension: local total nodes in ring: 2 index in ring: 1 total nodes in ring 2
+[2026-10-23 21:42:15.541] [system::topology::RingTopology] [info] custom ring, id: 5, dimension: local total nodes in ring: 2 index in ring: 1 total nodes in ring 2
+[2026-10-23 21:42:15.556] [workload] [info] sys[2] finished, 3992904 cycles, exposed communication 2431904 cycles.
+[2026-10-23 21:42:15.556] [statistics] [info] sys[2]. Post statistics processing start.
+[2026-10-23 21:42:15.556] [statistics] [info] sys[2]. Post statistics processing end.
+[2026-10-23 21:42:15.556] [statistics] [info] sys[2], Wall time: 3992904
+[2026-10-23 21:42:15.556] [statistics] [info] sys[2], GPU time: 1561000
+[2026-10-23 21:42:15.556] [statistics] [info] sys[2], Comm time: 2791260
+[2026-10-23 21:42:15.556] [statistics] [info] sys[2], Total compute-communication overlap: 359356
+[2026-10-23 21:42:15.556] [workload] [info] sys[3] finished, 3992904 cycles, exposed communication 2431904 cycles.
+[2026-10-23 21:42:15.556] [statistics] [info] sys[3]. Post statistics processing start.
+[2026-10-23 21:42:15.556] [statistics] [info] sys[3]. Post statistics processing end.
+[2026-10-23 21:42:15.556] [statistics] [info] sys[3], Wall time: 3992904
+[2026-10-23 21:42:15.556] [statistics] [info] sys[3], GPU time: 1561000
+[2026-10-23 21:42:15.556] [statistics] [info] sys[3], Comm time: 2791260
+[2026-10-23 21:42:15.556] [statistics] [info] sys[3], Total compute-communication overlap: 359356
+[2026-10-23 21:42:15.556] [workload] [info] sys[6] finished, 3992904 cycles, exposed communication 2431904 cycles.
+[2026-10-23 21:42:15.556] [statistics] [info] sys[6]. Post statistics processing start.
+[2026-10-23 21:42:15.556] [statistics] [info] sys[6]. Post statistics processing end.
+[2026-10-23 21:42:15.556] [statistics] [info] sys[6], Wall time: 3992904
+[2026-10-23 21:42:15.556] [statistics] [info] sys[6], GPU time: 1561000
+[2026-10-23 21:42:15.556] [statistics] [info] sys[6], Comm time: 2791260
+[2026-10-23 21:42:15.556] [statistics] [info] sys[6], Total compute-communication overlap: 359356
+[2026-10-23 21:42:15.556] [workload] [info] sys[7] finished, 3992904 cycles, exposed communication 2431904 cycles.
+[2026-10-23 21:42:15.556] [statistics] [info] sys[7]. Post statistics processing start.
+[2026-10-23 21:42:15.556] [statistics] [info] sys[7]. Post statistics processing end.
+[2026-10-23 21:42:15.556] [statistics] [info] sys[7], Wall time: 3992904
+[2026-10-23 21:42:15.556] [statistics] [info] sys[7], GPU time: 1561000
+[2026-10-23 21:42:15.556] [statistics] [info] sys[7], Comm time: 2791260
+[2026-10-23 21:42:15.556] [statistics] [info] sys[7], Total compute-communication overlap: 359356
+[2026-10-23 21:42:15.585] [workload] [info] sys[0] finished, 4774692 cycles, exposed communication 3649692 cycles.
+[2026-10-23 21:42:15.585] [statistics] [info] sys[0]. Post statistics processing start.
+[2026-10-23 21:42:15.586] [statistics] [info] sys[0]. Post statistics processing end.
+[2026-10-23 21:42:15.586] [statistics] [info] sys[0], Wall time: 4774692
+double free or corruption (fasttop)

@@ -61,6 +61,7 @@ def system_json(mode, machine):
 
 
 def run(binary, wl_dir, mode, machine, links, workdir):
+    wl_dir, workdir = wl_dir.resolve(), workdir.resolve()   # absolute: the simulator runs in workdir
     summary = json.loads((wl_dir / "summary.json").read_text())
     n = summary["ranks"]
     gpn = links["systems"]["nvlink_ib"]["gpus_per_node"]
@@ -74,7 +75,8 @@ def run(binary, wl_dir, mode, machine, links, workdir):
            f"--network-configuration={workdir / 'network.yml'}",
            f"--comm-group-configuration={wl_dir / 'comm_group.json'}"]
     t0 = time.time()
-    p = subprocess.run(cmd, capture_output=True, text=True, timeout=3600)
+    # ASTRA-sim writes debug logs to ./log; run it inside the workload's astra_sim folder
+    p = subprocess.run(cmd, capture_output=True, text=True, timeout=3600, cwd=workdir)
     wall = time.time() - t0
     out = p.stdout + p.stderr
     (workdir / f"astra_sim_{mode}.log").write_text(out)

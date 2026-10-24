@@ -3,7 +3,7 @@
  "binary": "AstraSim_Analytical_Congestion_Unaware",
  "arch": "sm_120",
  "machine_label": "final",
- "time": "2026-10-23 21:38:35",
+ "time": "2026-10-23 21:42:16",
  "network": "NVLink switch inside 8 GPU nodes, InfiniBand switch between nodes (perf_model/links.json)",
  "results": [
   {
@@ -23,7 +23,7 @@
    "replay": {
     "mode": "replay",
     "ranks": 8,
-    "ranks_reported": 8,
+    "ranks_reported": 6,
     "exit_code": -6,
     "crashed_at_shutdown": true,
     "step_ms": 87.275544,
@@ -38,7 +38,7 @@
    "roofline": {
     "mode": "roofline",
     "ranks": 8,
-    "ranks_reported": 7,
+    "ranks_reported": 6,
     "exit_code": -6,
     "crashed_at_shutdown": true,
     "step_ms": 53.790923,
@@ -68,7 +68,7 @@
    "replay": {
     "mode": "replay",
     "ranks": 32,
-    "ranks_reported": 30,
+    "ranks_reported": 29,
     "exit_code": -6,
     "crashed_at_shutdown": true,
     "step_ms": 648.101884,
@@ -77,13 +77,13 @@
      "0": 648.101884,
      "1": 574.574864
     },
-    "sim_wall_s": 11.6,
+    "sim_wall_s": 10.8,
     "vs_scaling_model_pct": 16.04
    },
    "roofline": {
     "mode": "roofline",
     "ranks": 32,
-    "ranks_reported": 24,
+    "ranks_reported": 26,
     "exit_code": -6,
     "crashed_at_shutdown": true,
     "step_ms": 568.348121,
@@ -92,7 +92,7 @@
      "0": 568.348121,
      "1": 499.437906
     },
-    "sim_wall_s": 12.5,
+    "sim_wall_s": 12.0,
     "vs_scaling_model_pct": 1.76
    }
   },
@@ -113,31 +113,31 @@
    "replay": {
     "mode": "replay",
     "ranks": 8,
-    "ranks_reported": 8,
-    "exit_code": 0,
-    "crashed_at_shutdown": false,
+    "ranks_reported": 5,
+    "exit_code": -6,
+    "crashed_at_shutdown": true,
     "step_ms": 4.774692,
     "max_exposed_comm_ms": 3.649692,
     "per_stage_ms": {
      "0": 4.774692,
      "1": 3.992904
     },
-    "sim_wall_s": 0.4,
+    "sim_wall_s": 0.5,
     "vs_scaling_model_pct": 13.82
    },
    "roofline": {
     "mode": "roofline",
     "ranks": 8,
-    "ranks_reported": 8,
-    "exit_code": 0,
-    "crashed_at_shutdown": false,
+    "ranks_reported": 5,
+    "exit_code": -6,
+    "crashed_at_shutdown": true,
     "step_ms": 4.412434,
     "max_exposed_comm_ms": 3.607334,
     "per_stage_ms": {
      "0": 4.412434,
      "1": 3.669243
     },
-    "sim_wall_s": 0.4,
+    "sim_wall_s": 0.5,
     "vs_scaling_model_pct": 5.18
    }
   }
