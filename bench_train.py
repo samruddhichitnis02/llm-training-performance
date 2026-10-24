@@ -409,6 +409,7 @@ def make_batch(B, T, vocab, device):
 def build(cfg, run, device="cuda"):
     """Model, optimizer and a step function for one configuration."""
     ops = load_ops(run["kernels"])
+    torch.manual_seed(run.get("seed", 0))   # same initial weights for every row, so losses compare
     model = LlamaModel(cfg, run["seq"], run["attn"], ops, run["ckpt"], run["nvtx"] and not run["compile"]).to(device)
     model.train()
     # Non-fused rows use the multi tensor (foreach) Adam, set explicitly. With only fused=False this

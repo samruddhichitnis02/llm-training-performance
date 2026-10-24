@@ -1,0 +1,21 @@
+sm_120 (final) | small: N=8192 tokens, d=768, ffn=2048, H=12, V=32000 | calibrated bandwidth 1441.3 GB/s
+CUDA C++ add_rmsnorm not available: No module named 'kernels.cuda_ext'
+op (fwd+bwd)                   impl                ms  achieved (of peak)      vs eager    vs compile    extra mem GB
+-----------------------------  -------------  -------  --------------------  ----------  ------------  --------------
+rmsnorm (x fp32 -> bf16)       eager           0.3625  277.7 GB/s (19.3%)          1             0.66           0.138
+rmsnorm (x fp32 -> bf16)       torch.compile   0.2378  423.2 GB/s (29.4%)          1.52          1              0.014
+rmsnorm (x fp32 -> bf16)       triton          0.198   508.4 GB/s (35.3%)          1.83          1.2            0.015
+add_rmsnorm (a bf16 + r fp32)  eager           0.4112  428.4 GB/s (29.7%)          1             0.43           0.151
+add_rmsnorm (a bf16 + r fp32)  torch.compile   0.1768  996.4 GB/s (69.1%)          2.33          1              0.039
+add_rmsnorm (a bf16 + r fp32)  triton          0.2068  851.9 GB/s (59.1%)          1.99          0.85           0.04
+swiglu                         eager           0.2112  1270.8 GB/s (88.2%)         1             1              0.067
+swiglu                         torch.compile   0.2116  1268.4 GB/s (88.0%)         1             1              0.034
+swiglu                         triton          0.1818  1476.5 GB/s (102.4%)        1.16          1.16           0.034
+rope_qkv                       eager           0.6026  250.6 GB/s (17.4%)          1             0.65           0.088
+rope_qkv                       torch.compile   0.3938  383.4 GB/s (26.6%)          1.53          1              0.088
+rope_qkv                       triton          0.1987  759.8 GB/s (52.7%)          3.03          1.98           0.038
+linear + cross entropy         eager          13.0998  92.2 TFLOPs (40.5%)         1             0.57           3.084
+linear + cross entropy         torch.compile   7.4151  162.9 TFLOPs (71.6%)        1.77          1              0.524
+linear + cross entropy         triton          7.0037  172.5 TFLOPs (75.8%)        1.87          1.06           0.311
+
+Saved results/bench_kernels_final_sm_120_small_b8_s1024.json

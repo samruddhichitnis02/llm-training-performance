@@ -1,0 +1,28 @@
+sm_120 (final) | small: 134M params, batch 8, seq 1024
+bf16 matmul peak reached this run (MFU reference): 225.0 TFLOPs
+running: 1 fp32 baseline, naive attn ...
+  223.31 ms/step, 36,685 tok/s, MFU 12.6%, 15.94 GB, loss 2.5698
+running: 2 bf16 autocast ...
+  156.24 ms/step, 52,432 tok/s, MFU 17.9%, 16.06 GB, loss 2.5617
+running: 3 + fused attention (SDPA) ...
+  73.86 ms/step, 110,907 tok/s, MFU 38.0%, 9.1 GB, loss 2.5537
+running: 4 + fused Adam ...
+  68.76 ms/step, 119,141 tok/s, MFU 40.8%, 9.1 GB, loss 2.5752
+running: 5 + torch.compile ...
+  48.34 ms/step, 169,450 tok/s, MFU 58.0%, 5.49 GB, loss 2.5554
+running: 6 fused Triton kernels ...
+  48.45 ms/step, 169,074 tok/s, MFU 57.9%, 5.15 GB, loss 2.5364
+running: 7 CUDA C++ add+RMSNorm ...
+  error ModuleNotFoundError: No module named 'kernels.cuda_ext'
+
+row                          ms/step    tok/s                                                      speedup    TFLOPs  MFU      peak GB    loss  finite
+---------------------------  ---------  -------------------------------------------------------  ---------  --------  -----  ---------  ------  --------
+1 fp32 baseline, naive attn  223.31     36,685                                                        1        28.26  12.6%      15.94  2.5698  yes
+2 bf16 autocast              156.24     52,432                                                        1.43     40.39  17.9%      16.06  2.5617  yes
+3 + fused attention (SDPA)   73.86      110,907                                                       3.02     85.45  38.0%       9.1   2.5537  yes
+4 + fused Adam               68.76      119,141                                                       3.25     91.79  40.8%       9.1   2.5752  yes
+5 + torch.compile            48.34      169,450                                                       4.62    130.55  58.0%       5.49  2.5554  yes
+6 fused Triton kernels       48.45      169,074                                                       4.61    130.26  57.9%       5.15  2.5364  yes
+7 CUDA C++ add+RMSNorm       error      ModuleNotFoundError: No module named 'kernels.cuda_ext'
+
+Saved results/milestones/m3_sweep_final_sm_120_small_b8_s1024.json

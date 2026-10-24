@@ -1,0 +1,175 @@
+{
+  "arch": "sm_120",
+  "machine_label": "final",
+  "torch": "2.11.0+cu128",
+  "cuda": "12.8",
+  "os": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "python": "3.12.3",
+  "gpu_count": 1,
+  "sm_count": 170,
+  "gpu_mem_gb": 34.2,
+  "time": "2026-10-23 17:39:10",
+  "size": "small",
+  "batch": 8,
+  "seq": 1024,
+  "tokens": 8192,
+  "peak_bandwidth_gbs": 1441.3,
+  "peak_bf16_tflops": 227.5,
+  "ops": [
+    {
+      "op": "rmsnorm (x fp32 -> bf16)",
+      "bytes": 100663296,
+      "flops": null,
+      "results": {
+        "eager": {
+          "ms": 0.3625,
+          "peak_mem_gb": 0.138,
+          "gbs": 277.7,
+          "pct_peak_bw": 19.3,
+          "speedup_vs_eager": 1.0,
+          "speedup_vs_compile": 0.66
+        },
+        "torch.compile": {
+          "ms": 0.2378,
+          "peak_mem_gb": 0.014,
+          "gbs": 423.2,
+          "pct_peak_bw": 29.4,
+          "speedup_vs_eager": 1.52,
+          "speedup_vs_compile": 1.0
+        },
+        "triton": {
+          "ms": 0.198,
+          "peak_mem_gb": 0.015,
+          "gbs": 508.4,
+          "pct_peak_bw": 35.3,
+          "speedup_vs_eager": 1.83,
+          "speedup_vs_compile": 1.2
+        }
+      }
+    },
+    {
+      "op": "add_rmsnorm (a bf16 + r fp32)",
+      "bytes": 176160768,
+      "flops": null,
+      "results": {
+        "eager": {
+          "ms": 0.4112,
+          "peak_mem_gb": 0.151,
+          "gbs": 428.4,
+          "pct_peak_bw": 29.7,
+          "speedup_vs_eager": 1.0,
+          "speedup_vs_compile": 0.43
+        },
+        "torch.compile": {
+          "ms": 0.1768,
+          "peak_mem_gb": 0.039,
+          "gbs": 996.4,
+          "pct_peak_bw": 69.1,
+          "speedup_vs_eager": 2.33,
+          "speedup_vs_compile": 1.0
+        },
+        "triton": {
+          "ms": 0.2068,
+          "peak_mem_gb": 0.04,
+          "gbs": 851.9,
+          "pct_peak_bw": 59.1,
+          "speedup_vs_eager": 1.99,
+          "speedup_vs_compile": 0.85
+        }
+      }
+    },
+    {
+      "op": "swiglu",
+      "bytes": 268435456,
+      "flops": null,
+      "results": {
+        "eager": {
+          "ms": 0.2112,
+          "peak_mem_gb": 0.067,
+          "gbs": 1270.8,
+          "pct_peak_bw": 88.2,
+          "speedup_vs_eager": 1.0,
+          "speedup_vs_compile": 1.0
+        },
+        "torch.compile": {
+          "ms": 0.2116,
+          "peak_mem_gb": 0.034,
+          "gbs": 1268.4,
+          "pct_peak_bw": 88.0,
+          "speedup_vs_eager": 1.0,
+          "speedup_vs_compile": 1.0
+        },
+        "triton": {
+          "ms": 0.1818,
+          "peak_mem_gb": 0.034,
+          "gbs": 1476.5,
+          "pct_peak_bw": 102.4,
+          "speedup_vs_eager": 1.16,
+          "speedup_vs_compile": 1.16
+        }
+      }
+    },
+    {
+      "op": "rope_qkv",
+      "bytes": 150994944,
+      "flops": null,
+      "results": {
+        "eager": {
+          "ms": 0.6026,
+          "peak_mem_gb": 0.088,
+          "gbs": 250.6,
+          "pct_peak_bw": 17.4,
+          "speedup_vs_eager": 1.0,
+          "speedup_vs_compile": 0.65
+        },
+        "torch.compile": {
+          "ms": 0.3938,
+          "peak_mem_gb": 0.088,
+          "gbs": 383.4,
+          "pct_peak_bw": 26.6,
+          "speedup_vs_eager": 1.53,
+          "speedup_vs_compile": 1.0
+        },
+        "triton": {
+          "ms": 0.1987,
+          "peak_mem_gb": 0.038,
+          "gbs": 759.8,
+          "pct_peak_bw": 52.7,
+          "speedup_vs_eager": 3.03,
+          "speedup_vs_compile": 1.98
+        }
+      }
+    },
+    {
+      "op": "linear + cross entropy",
+      "bytes": null,
+      "flops": 1207959552000.0,
+      "results": {
+        "eager": {
+          "ms": 13.0998,
+          "peak_mem_gb": 3.084,
+          "tflops": 92.2,
+          "pct_peak_bf16": 40.5,
+          "speedup_vs_eager": 1.0,
+          "speedup_vs_compile": 0.57
+        },
+        "torch.compile": {
+          "ms": 7.4151,
+          "peak_mem_gb": 0.524,
+          "tflops": 162.9,
+          "pct_peak_bf16": 71.6,
+          "speedup_vs_eager": 1.77,
+          "speedup_vs_compile": 1.0
+        },
+        "triton": {
+          "ms": 7.0037,
+          "peak_mem_gb": 0.311,
+          "tflops": 172.5,
+          "pct_peak_bf16": 75.8,
+          "speedup_vs_eager": 1.87,
+          "speedup_vs_compile": 1.06
+        }
+      }
+    }
+  ]
+}

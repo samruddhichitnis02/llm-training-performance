@@ -77,3 +77,78 @@ What the profile says:
 Compared with the expected finding in the spec (matmul about 40%, elementwise about 30%, optimizer about 15%, attention under 10%), the matmul share here is higher and elementwise lower. The direction is the same: after bf16 and fused attention, the non matmul kernels are about half the step.
 
 Nsight Systems is not installed yet. Ubuntu's own package (2022.4) is too old for `sm_120`; a current version comes from NVIDIA's CUDA apt repository. The capture commands are in the `profile_step.py` docstring.
+
+## Milestone 3: fused Triton kernels
+
+Code: `kernels/triton_ops.py` (four fused ops, forward and backward, each a `torch.autograd.Function`), `kernels/test_kernels.py`, `kernels/bench_kernels.py`, `kernels/check_loss_parity.py`. Console output of every run below is saved in `milestones/m3_*.txt`.
+
+### Correctness
+
+Source: `milestones/m3_test_kernels.txt`. Every output and every gradient compared against a float32 PyTorch reference, relative norm error.
+
+**76 of 76 checks passed.** Worst errors per group:
+
+| Kernel | fp32 worst | bf16 worst | Tolerance fp32 / bf16 |
+|---|---|---|---|
+| rmsnorm, add_rmsnorm (D 768 and 2048, plus mixed bf16 a with fp32 residual) | 2.0e-7 | 2.5e-3 | 1e-4 / 3e-2 |
+| swiglu (including a ragged shape) | 6.3e-8 | 2.4e-3 | 1e-4 / 3e-2 |
+| rope_qkv (12 heads of 64, 16 heads of 128) | 3.9e-8 | 2.1e-3 | 1e-4 / 3e-2 |
+| linear + cross entropy (N = 4133, V = 32000) | 8.4e-7 | 3.5e-3 | 1e-4 / 5e-2 |
+
+The bf16 errors are about 2e-3, which is the rounding of bf16 itself (8 bit mantissa), so the kernels add no error of their own.
+
+Training parity (`loss_parity_final_sm_120_small_torch_triton.json`): `small`, batch 8, seq 1024, 20 steps from the same initial weights. Step 0 loss is identical (10.5238 both). The curves stay within 1.8% of each other over 20 steps, which is the normal drift of bf16 rounding in training.
+
+### Microbenchmarks (forward plus backward)
+
+Source: `bench_kernels_final_sm_120_small_b8_s1024.json`. Real training shapes for `small` at batch 8, seq 1024 (8192 tokens). Bandwidth is minimum bytes moved divided by time, against the calibrated 1441 GB/s.
+
+| Op | eager | torch.compile | Triton | Triton vs eager | Triton vs compile |
+|---|---|---|---|---|---|
+| rmsnorm (fp32 in, bf16 out) | 0.348 ms, 20% BW | 0.238 ms, 29% BW | 0.183 ms, 38% BW | 1.90x | 1.30x |
+| add_rmsnorm (bf16 + fp32) | 0.408 ms, 30% BW | 0.295 ms, 42% BW | 0.237 ms, 52% BW | 1.72x | 1.24x |
+| swiglu | 0.203 ms, 92% BW | 0.272 ms, 68% BW | 0.191 ms, 97% BW | 1.06x | 1.42x |
+| rope_qkv | 0.595 ms, 18% BW | 0.443 ms, 24% BW | 0.204 ms, 51% BW | 2.92x | 2.17x |
+| linear + cross entropy | 12.89 ms, 94 TFLOPs, 3.08 GB | 7.24 ms, 167 TFLOPs, 0.52 GB | 6.91 ms, 175 TFLOPs, 0.31 GB | 1.87x | 1.05x |
+
+What it shows:
+1. Every Triton kernel beats both eager and `torch.compile`. RoPE gains the most (2.9x) because the eager version does the split, the permute, the rotation and the cast as separate passes.
+2. Eager swiglu already runs near the copy bandwidth. Its intermediates (33 MB each) fit in this GPU's large L2 cache, so the extra passes are cheap. Fusion still wins, but only by 6%.
+3. The chunked cross entropy uses 10 times less extra memory than eager (0.31 GB against 3.08 GB) because the full 8192 by 32000 logits never exist.
+4. The norm kernels reach only about 40 to 50% of bandwidth. One program per 768 wide row is a small amount of work per program. This is the obvious place to tune next.
+
+### Ladder with row 6
+
+Sources: `milestones/m3_sweep_final_sm_120_small_b8_s1024.json`, `milestones/m3_sweep_final_sm_120_medium_b4_s1024.json`.
+
+| Row | small b8 s1024 ms | MFU | Peak GB | medium b4 s1024 ms | MFU | Peak GB |
+|---|---|---|---|---|---|---|
+| 1 fp32 baseline, naive attention | 223.31 | 12.6% | 15.94 | 320.37 | 13.2% | 21.16 |
+| 2 bf16 autocast | 156.24 | 17.9% | 16.06 | 226.29 | 18.7% | 21.62 |
+| 3 + fused attention (SDPA) | 73.86 | 38.0% | 9.10 | 117.51 | 36.0% | 12.36 |
+| 4 + fused Adam | 68.76 | 40.8% | 9.10 | 103.60 | 40.9% | 12.36 |
+| 5 + torch.compile | 48.34 | 58.0% | 5.49 | 80.17 | 52.8% | 9.74 |
+| 6 fused Triton kernels (no compile) | 48.45 | 57.9% | 5.15 | 81.34 | 52.1% | 9.62 |
+| 7 CUDA C++ add+RMSNorm | milestone 4 | | | | | |
+
+Speedup at row 6: 4.61x for small, 3.94x for medium. All losses finite.
+
+Four hand written kernels match what `torch.compile` gets from fusing the whole graph, with slightly less memory. Row 6 does not use the compiler at all.
+
+### Profile after fusion
+
+Source: `profile_final_sm_120_medium_b4_s1024_bf16_sdpa_fusedadam_triton.json`. Compared with the same config without the kernels (milestone 2):
+
+| Bucket | fused Adam, torch ops | fused Adam, Triton kernels |
+|---|---|---|
+| matmul | 59.0% | 72.1% |
+| attention | 6.4% | 7.5% |
+| optimizer | 7.8% | 9.5% |
+| memory copies | 9.5% | 3.1% |
+| elementwise and other | 17.2% | 7.8% |
+| launches per step | 2921 | 1177 |
+| elementwise plus copies, ms per step | 25.0 | 8.4 |
+| GPU idle | 9.9% | 5.7% |
+| clean step time | 103.7 ms | 81.4 ms |
+
+Launches per step dropped by 60%, and elementwise plus copy time dropped from 25 ms to 8.4 ms. Matmuls are now 72% of GPU time. The biggest remaining non matmul items are the optimizer (7.3 ms) and the fp32 to bf16 weight casts that autocast does every step (146 copy launches).
