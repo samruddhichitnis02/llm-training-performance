@@ -1,8 +1,0 @@
-usage: profile_step.py [-h] [--size {tiny,small,medium,large}] [--batch BATCH]
-                       [--seq SEQ] [--precision {fp32,bf16}]
-                       [--attn {naive,sdpa}] [--compile] [--fused-adam]
-                       [--ckpt] [--kernels {torch,triton,cuda}]
-                       [--linear {bf16,fp8,fp4}] [--warmup WARMUP]
-                       [--steps STEPS] [--prof-steps PROF_STEPS] [--top TOP]
-                       [--machine-label MACHINE_LABEL] [--tag TAG]
-profile_step.py: error: argument --linear: invalid choice: ' --machine-label' (choose from 'bf16', 'fp8', 'fp4')
