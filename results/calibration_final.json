@@ -1,0 +1,54 @@
+{
+  "arch": "sm_120",
+  "machine_label": "final",
+  "torch": "2.11.0+cu128",
+  "cuda": "12.8",
+  "os": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "python": "3.12.3",
+  "gpu_count": 1,
+  "sm_count": 170,
+  "gpu_mem_gb": 34.2,
+  "time": "2026-10-23 16:47:03",
+  "matmul": {
+    "fp32": {
+      "status": "ok",
+      "tflops": 65.3,
+      "ms": 16.833,
+      "n": 8192
+    },
+    "tf32": {
+      "status": "ok",
+      "tflops": 110.1,
+      "ms": 9.989,
+      "n": 8192
+    },
+    "fp16": {
+      "status": "ok",
+      "tflops": 220.3,
+      "ms": 4.991,
+      "n": 8192
+    },
+    "bf16": {
+      "status": "ok",
+      "tflops": 227.5,
+      "ms": 4.833,
+      "n": 8192
+    },
+    "fp8": {
+      "status": "ok",
+      "tflops": 447.1,
+      "ms": 2.459,
+      "n": 8192,
+      "format": "e4m3 x e4m3, tensorwise scale, bf16 out"
+    },
+    "fp4": {
+      "status": "ok",
+      "tflops": 1291.7,
+      "ms": 0.851,
+      "n": 8192,
+      "format": "nvfp4 (e2m1 values, e4m3 scale per 16)"
+    }
+  },
+  "bandwidth_gbs": 1441.3,
+  "launch_overhead_us": 6.5
+}

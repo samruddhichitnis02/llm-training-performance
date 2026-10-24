@@ -1,0 +1,13 @@
+__pycache__/
+.venv/
+.env
+*.pt
+*.pth
+*.safetensors
+*.nsys-rep
+*.ncu-rep
+profiles/
+build/
+*.so
+logs/
+.vscode/
