@@ -1,0 +1,39 @@
+{
+  "_note": "Link constants for perf_model/scaling.py. These are NOT measured in this repo: the only machine available has one GPU, so no NCCL all reduce could be timed. Bandwidth is the effective per GPU bus bandwidth a ring collective reaches (below the spec sheet rate). Replace with nccl-tests busbw numbers when a multi GPU machine is available.",
+  "links": {
+    "nvlink": {
+      "bw_gbs": 360.0,
+      "latency_us": 3.0,
+      "_source": "NVLink 4 class (900 GB/s total, 450 GB/s per direction per GPU), about 80% reached by NCCL ring all reduce"
+    },
+    "pcie": {
+      "bw_gbs": 25.0,
+      "latency_us": 10.0,
+      "_source": "PCIe Gen5 x16 (64 GB/s per direction) for cards without NVLink or direct peer access, traffic staged through host memory"
+    },
+    "infiniband": {
+      "bw_gbs": 45.0,
+      "latency_us": 5.0,
+      "_source": "one 400 Gb/s (NDR, 50 GB/s) NIC per GPU, about 90% reached"
+    }
+  },
+  "systems": {
+    "nvlink_ib": {
+      "gpus_per_node": 8,
+      "intra": "nvlink",
+      "inter": "infiniband",
+      "_desc": "data center style: 8 GPUs per node on NVLink, nodes on InfiniBand"
+    },
+    "pcie_ib": {
+      "gpus_per_node": 8,
+      "intra": "pcie",
+      "inter": "infiniband",
+      "_desc": "8 PCIe cards per node with no NVLink (like the sm_120 card used here), nodes on InfiniBand"
+    }
+  },
+  "gpu_memory_gb": 32.0,
+  "_gpu_memory_note": "memory of the GPU whose calibration is used (sm_120, 32 GB); configurations that exceed 90% of it are rejected",
+  "activation_bytes_per_token_per_layer_per_d": 70.0,
+  "activation_bytes_per_token_per_layer_per_d_ckpt": 19.5,
+  "_activation_note": "measured in milestone 5 on medium (d 1024, 24 layers) at seq 1024, bf16, SDPA: each extra sequence adds 1.76 GB of peak memory without activation checkpointing (1.76e9 / (24 x 1024 x 1024) = 70) and 0.49 GB with it (= 19.5)"
+}

@@ -1,0 +1,2662 @@
+{
+ "prediction": true,
+ "arch": "sm_120",
+ "machine_label": "final",
+ "time": "2026-10-23 21:10:12",
+ "links": {
+  "_note": "Link constants for perf_model/scaling.py. These are NOT measured in this repo: the only machine available has one GPU, so no NCCL all reduce could be timed. Bandwidth is the effective per GPU bus bandwidth a ring collective reaches (below the spec sheet rate). Replace with nccl-tests busbw numbers when a multi GPU machine is available.",
+  "links": {
+   "nvlink": {
+    "bw_gbs": 360.0,
+    "latency_us": 3.0,
+    "_source": "NVLink 4 class (900 GB/s total, 450 GB/s per direction per GPU), about 80% reached by NCCL ring all reduce"
+   },
+   "pcie": {
+    "bw_gbs": 25.0,
+    "latency_us": 10.0,
+    "_source": "PCIe Gen5 x16 (64 GB/s per direction) for cards without NVLink or direct peer access, traffic staged through host memory"
+   },
+   "infiniband": {
+    "bw_gbs": 45.0,
+    "latency_us": 5.0,
+    "_source": "one 400 Gb/s (NDR, 50 GB/s) NIC per GPU, about 90% reached"
+   }
+  },
+  "systems": {
+   "nvlink_ib": {
+    "gpus_per_node": 8,
+    "intra": "nvlink",
+    "inter": "infiniband",
+    "_desc": "data center style: 8 GPUs per node on NVLink, nodes on InfiniBand"
+   },
+   "pcie_ib": {
+    "gpus_per_node": 8,
+    "intra": "pcie",
+    "inter": "infiniband",
+    "_desc": "8 PCIe cards per node with no NVLink (like the sm_120 card used here), nodes on InfiniBand"
+   }
+  },
+  "gpu_memory_gb": 32.0,
+  "_gpu_memory_note": "memory of the GPU whose calibration is used (sm_120, 32 GB); configurations that exceed 90% of it are rejected",
+  "activation_bytes_per_token_per_layer_per_d": 70.0,
+  "activation_bytes_per_token_per_layer_per_d_ckpt": 19.5,
+  "_activation_note": "measured in milestone 5 on medium (d 1024, 24 layers) at seq 1024, bf16, SDPA: each extra sequence adds 1.76 GB of peak memory without activation checkpointing (1.76e9 / (24 x 1024 x 1024) = 70) and 0.49 GB with it (= 19.5)"
+ },
+ "workloads": {
+  "small": [
+   "small",
+   1024,
+   512
+  ],
+  "medium": [
+   "medium",
+   1024,
+   512
+  ],
+  "large": [
+   "large",
+   1024,
+   512
+  ],
+  "llama3-8b": [
+   "llama3-8b",
+   4096,
+   1024
+  ],
+  "llama3-70b": [
+   "llama3-70b",
+   4096,
+   1024
+  ]
+ },
+ "gpu_counts": [
+  8,
+  64,
+  1024,
+  4096
+ ],
+ "results": {
+  "small": {
+   "nvlink_ib": {
+    "best": [
+     {
+      "gpus": 8,
+      "dp": 8,
+      "tp": 1,
+      "pp": 1,
+      "mb": 16,
+      "microbatches": 4,
+      "ckpt": false,
+      "step_s": 0.32961208033090694,
+      "tokens_per_s": 1590621.3130102889,
+      "tokens_per_s_per_gpu": 198827.6641262861,
+      "mfu": 0.6733269078294964,
+      "mem_gb": 12.044810496,
+      "bubble_frac": 0.0,
+      "breakdown_s": {
+       "compute": 0.32872815218825796,
+       "pipeline bubble": 0.0,
+       "tensor parallel comm": 0.0,
+       "pipeline sends": 0.0,
+       "data parallel comm (exposed)": 0.0,
+       "optimizer": 0.0008839281426489974
+      },
+      "dp_allreduce_s": 0.0026496138666666667,
+      "dp_hidden_s": 0.0026496138666666667,
+      "scaling_efficiency": 1.0
+     },
+     {
+      "gpus": 64,
+      "dp": 64,
+      "tp": 1,
+      "pp": 1,
+      "mb": 8,
+      "microbatches": 1,
+      "ckpt": false,
+      "step_s": 0.048416207951057784,
+      "tokens_per_s": 10828770.409487335,
+      "tokens_per_s_per_gpu": 169199.5376482396,
+      "mfu": 0.5729917010869713,
+      "mem_gb": 6.642644832,
+      "bubble_frac": 0.0,
+      "breakdown_s": {
+       "compute": 0.04781723032807853,
+       "pipeline bubble": 0.0,
+       "tensor parallel comm": 0.0,
+       "pipeline sends": 0.0,
+       "data parallel comm (exposed)": 0.0,
+       "optimizer": 0.0005989776229792549
+      },
+      "dp_allreduce_s": 0.005327227733333334,
+      "dp_hidden_s": 0.005327227733333334,
+      "scaling_efficiency": 0.8509858947031229
+     },
+     {
+      "gpus": 1024,
+      "dp": 512,
+      "tp": 2,
+      "pp": 1,
+      "mb": 1,
+      "microbatches": 1,
+      "ckpt": false,
+      "step_s": 0.009161647751593944,
+      "tokens_per_s": 57226387.02287854,
+      "tokens_per_s_per_gpu": 55885.14357702983,
+      "mfu": 0.18925420204317622,
+      "mem_gb": 1.001878422,
+      "bubble_frac": 0.0,
+      "breakdown_s": {
+       "compute": 0.0074758564809170105,
+       "pipeline bubble": 0.0,
+       "tensor parallel comm": 0.0004977152,
+       "pipeline sends": 0.0,
+       "data parallel comm (exposed)": 0.0009063966666666657,
+       "optimizer": 0.0002816794040102685
+      },
+      "dp_allreduce_s": 0.0053623966666666665,
+      "dp_hidden_s": 0.004456000000000001,
+      "scaling_efficiency": 0.28107327932764015
+     },
+     null
+    ],
+    "restricted": {
+     "dp": [
+      {
+       "gpus": 8,
+       "dp": 8,
+       "tp": 1,
+       "pp": 1,
+       "mb": 16,
+       "microbatches": 4,
+       "ckpt": false,
+       "step_s": 0.32961208033090694,
+       "tokens_per_s": 1590621.3130102889,
+       "tokens_per_s_per_gpu": 198827.6641262861,
+       "mfu": 0.6733269078294964,
+       "mem_gb": 12.044810496,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 0.32872815218825796,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.0,
+        "optimizer": 0.0008839281426489974
+       },
+       "dp_allreduce_s": 0.0026496138666666667,
+       "dp_hidden_s": 0.0026496138666666667
+      },
+      {
+       "gpus": 64,
+       "dp": 64,
+       "tp": 1,
+       "pp": 1,
+       "mb": 8,
+       "microbatches": 1,
+       "ckpt": false,
+       "step_s": 0.048416207951057784,
+       "tokens_per_s": 10828770.409487335,
+       "tokens_per_s_per_gpu": 169199.5376482396,
+       "mfu": 0.5729917010869713,
+       "mem_gb": 6.642644832,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 0.04781723032807853,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.0,
+        "optimizer": 0.0005989776229792549
+       },
+       "dp_allreduce_s": 0.005327227733333334,
+       "dp_hidden_s": 0.005327227733333334
+      },
+      null,
+      null
+     ],
+     "tp+dp": [
+      {
+       "gpus": 8,
+       "dp": 8,
+       "tp": 1,
+       "pp": 1,
+       "mb": 16,
+       "microbatches": 4,
+       "ckpt": false,
+       "step_s": 0.32961208033090694,
+       "tokens_per_s": 1590621.3130102889,
+       "tokens_per_s_per_gpu": 198827.6641262861,
+       "mfu": 0.6733269078294964,
+       "mem_gb": 12.044810496,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 0.32872815218825796,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.0,
+        "optimizer": 0.0008839281426489974
+       },
+       "dp_allreduce_s": 0.0026496138666666667,
+       "dp_hidden_s": 0.0026496138666666667
+      },
+      {
+       "gpus": 64,
+       "dp": 64,
+       "tp": 1,
+       "pp": 1,
+       "mb": 8,
+       "microbatches": 1,
+       "ckpt": false,
+       "step_s": 0.048416207951057784,
+       "tokens_per_s": 10828770.409487335,
+       "tokens_per_s_per_gpu": 169199.5376482396,
+       "mfu": 0.5729917010869713,
+       "mem_gb": 6.642644832,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 0.04781723032807853,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.0,
+        "optimizer": 0.0005989776229792549
+       },
+       "dp_allreduce_s": 0.005327227733333334,
+       "dp_hidden_s": 0.005327227733333334
+      },
+      {
+       "gpus": 1024,
+       "dp": 512,
+       "tp": 2,
+       "pp": 1,
+       "mb": 1,
+       "microbatches": 1,
+       "ckpt": false,
+       "step_s": 0.009161647751593944,
+       "tokens_per_s": 57226387.02287854,
+       "tokens_per_s_per_gpu": 55885.14357702983,
+       "mfu": 0.18925420204317622,
+       "mem_gb": 1.001878422,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 0.0074758564809170105,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.0004977152,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.0009063966666666657,
+        "optimizer": 0.0002816794040102685
+       },
+       "dp_allreduce_s": 0.0053623966666666665,
+       "dp_hidden_s": 0.004456000000000001
+      },
+      null
+     ],
+     "pp+dp": [
+      {
+       "gpus": 8,
+       "dp": 8,
+       "tp": 1,
+       "pp": 1,
+       "mb": 16,
+       "microbatches": 4,
+       "ckpt": false,
+       "step_s": 0.32961208033090694,
+       "tokens_per_s": 1590621.3130102889,
+       "tokens_per_s_per_gpu": 198827.6641262861,
+       "mfu": 0.6733269078294964,
+       "mem_gb": 12.044810496,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 0.32872815218825796,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.0,
+        "optimizer": 0.0008839281426489974
+       },
+       "dp_allreduce_s": 0.0026496138666666667,
+       "dp_hidden_s": 0.0026496138666666667
+      },
+      {
+       "gpus": 64,
+       "dp": 64,
+       "tp": 1,
+       "pp": 1,
+       "mb": 8,
+       "microbatches": 1,
+       "ckpt": false,
+       "step_s": 0.048416207951057784,
+       "tokens_per_s": 10828770.409487335,
+       "tokens_per_s_per_gpu": 169199.5376482396,
+       "mfu": 0.5729917010869713,
+       "mem_gb": 6.642644832,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 0.04781723032807853,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.0,
+        "optimizer": 0.0005989776229792549
+       },
+       "dp_allreduce_s": 0.005327227733333334,
+       "dp_hidden_s": 0.005327227733333334
+      },
+      null,
+      null
+     ]
+    }
+   },
+   "pcie_ib": {
+    "best": [
+     {
+      "gpus": 8,
+      "dp": 8,
+      "tp": 1,
+      "pp": 1,
+      "mb": 16,
+      "microbatches": 4,
+      "ckpt": false,
+      "step_s": 0.32961208033090694,
+      "tokens_per_s": 1590621.3130102889,
+      "tokens_per_s_per_gpu": 198827.6641262861,
+      "mfu": 0.6733269078294964,
+      "mem_gb": 12.044810496,
+      "bubble_frac": 0.0,
+      "breakdown_s": {
+       "compute": 0.32872815218825796,
+       "pipeline bubble": 0.0,
+       "tensor parallel comm": 0.0,
+       "pipeline sends": 0.0,
+       "data parallel comm (exposed)": 0.0,
+       "optimizer": 0.0008839281426489974
+      },
+      "dp_allreduce_s": 0.037689639680000005,
+      "dp_hidden_s": 0.037689639680000005,
+      "scaling_efficiency": 1.0
+     },
+     {
+      "gpus": 64,
+      "dp": 64,
+      "tp": 1,
+      "pp": 1,
+      "mb": 8,
+      "microbatches": 1,
+      "ckpt": false,
+      "step_s": 0.06187936149772445,
+      "tokens_per_s": 8472744.180129915,
+      "tokens_per_s_per_gpu": 132386.62781452993,
+      "mfu": 0.4483253330769635,
+      "mem_gb": 6.642644832,
+      "bubble_frac": 0.0,
+      "breakdown_s": {
+       "compute": 0.04781723032807853,
+       "pipeline bubble": 0.0,
+       "tensor parallel comm": 0.0,
+       "pipeline sends": 0.0,
+       "data parallel comm (exposed)": 0.013463153546666669,
+       "optimizer": 0.0005989776229792549
+      },
+      "dp_allreduce_s": 0.04036725354666667,
+      "dp_hidden_s": 0.0269041,
+      "scaling_efficiency": 0.6658360565481677
+     },
+     {
+      "gpus": 1024,
+      "dp": 128,
+      "tp": 2,
+      "pp": 4,
+      "mb": 1,
+      "microbatches": 4,
+      "ckpt": false,
+      "step_s": 0.024253551590075362,
+      "tokens_per_s": 21616957.749583386,
+      "tokens_per_s_per_gpu": 21110.310302327525,
+      "mfu": 0.07148974978732935,
+      "mem_gb": 0.498981462,
+      "bubble_frac": 0.42857142857142855,
+      "breakdown_s": {
+       "compute": 0.0074758564809170105,
+       "pipeline bubble": 0.005606892360687758,
+       "tensor parallel comm": 0.00696482304,
+       "pipeline sends": 0.00102080384,
+       "data parallel comm (exposed)": 0.0031128478666666657,
+       "optimizer": 7.2328001803927e-05
+      },
+      "dp_allreduce_s": 0.004226847866666666,
+      "dp_hidden_s": 0.0011140000000000002,
+      "scaling_efficiency": 0.10617390892305226
+     },
+     null
+    ],
+    "restricted": {
+     "dp": [
+      {
+       "gpus": 8,
+       "dp": 8,
+       "tp": 1,
+       "pp": 1,
+       "mb": 16,
+       "microbatches": 4,
+       "ckpt": false,
+       "step_s": 0.32961208033090694,
+       "tokens_per_s": 1590621.3130102889,
+       "tokens_per_s_per_gpu": 198827.6641262861,
+       "mfu": 0.6733269078294964,
+       "mem_gb": 12.044810496,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 0.32872815218825796,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.0,
+        "optimizer": 0.0008839281426489974
+       },
+       "dp_allreduce_s": 0.037689639680000005,
+       "dp_hidden_s": 0.037689639680000005
+      },
+      {
+       "gpus": 64,
+       "dp": 64,
+       "tp": 1,
+       "pp": 1,
+       "mb": 8,
+       "microbatches": 1,
+       "ckpt": false,
+       "step_s": 0.06187936149772445,
+       "tokens_per_s": 8472744.180129915,
+       "tokens_per_s_per_gpu": 132386.62781452993,
+       "mfu": 0.4483253330769635,
+       "mem_gb": 6.642644832,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 0.04781723032807853,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.013463153546666669,
+        "optimizer": 0.0005989776229792549
+       },
+       "dp_allreduce_s": 0.04036725354666667,
+       "dp_hidden_s": 0.0269041
+      },
+      null,
+      null
+     ],
+     "tp+dp": [
+      {
+       "gpus": 8,
+       "dp": 8,
+       "tp": 1,
+       "pp": 1,
+       "mb": 16,
+       "microbatches": 4,
+       "ckpt": false,
+       "step_s": 0.32961208033090694,
+       "tokens_per_s": 1590621.3130102889,
+       "tokens_per_s_per_gpu": 198827.6641262861,
+       "mfu": 0.6733269078294964,
+       "mem_gb": 12.044810496,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 0.32872815218825796,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.0,
+        "optimizer": 0.0008839281426489974
+       },
+       "dp_allreduce_s": 0.037689639680000005,
+       "dp_hidden_s": 0.037689639680000005
+      },
+      {
+       "gpus": 64,
+       "dp": 64,
+       "tp": 1,
+       "pp": 1,
+       "mb": 8,
+       "microbatches": 1,
+       "ckpt": false,
+       "step_s": 0.06187936149772445,
+       "tokens_per_s": 8472744.180129915,
+       "tokens_per_s_per_gpu": 132386.62781452993,
+       "mfu": 0.4483253330769635,
+       "mem_gb": 6.642644832,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 0.04781723032807853,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.013463153546666669,
+        "optimizer": 0.0005989776229792549
+       },
+       "dp_allreduce_s": 0.04036725354666667,
+       "dp_hidden_s": 0.0269041
+      },
+      {
+       "gpus": 1024,
+       "dp": 256,
+       "tp": 4,
+       "pp": 1,
+       "mb": 2,
+       "microbatches": 1,
+       "ckpt": false,
+       "step_s": 0.02479087332609584,
+       "tokens_per_s": 21148428.01637464,
+       "tokens_per_s_per_gpu": 20652.76173474086,
+       "mfu": 0.06994026841335281,
+       "mem_gb": 0.666613782,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 0.0086653827768898,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.01193969664,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.004043682106666665,
+        "optimizer": 0.00014211180253937417
+       },
+       "dp_allreduce_s": 0.009611082106666665,
+       "dp_hidden_s": 0.0055674
+      },
+      null
+     ],
+     "pp+dp": [
+      {
+       "gpus": 8,
+       "dp": 8,
+       "tp": 1,
+       "pp": 1,
+       "mb": 16,
+       "microbatches": 4,
+       "ckpt": false,
+       "step_s": 0.32961208033090694,
+       "tokens_per_s": 1590621.3130102889,
+       "tokens_per_s_per_gpu": 198827.6641262861,
+       "mfu": 0.6733269078294964,
+       "mem_gb": 12.044810496,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 0.32872815218825796,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.0,
+        "optimizer": 0.0008839281426489974
+       },
+       "dp_allreduce_s": 0.037689639680000005,
+       "dp_hidden_s": 0.037689639680000005
+      },
+      {
+       "gpus": 64,
+       "dp": 64,
+       "tp": 1,
+       "pp": 1,
+       "mb": 8,
+       "microbatches": 1,
+       "ckpt": false,
+       "step_s": 0.06187936149772445,
+       "tokens_per_s": 8472744.180129915,
+       "tokens_per_s_per_gpu": 132386.62781452993,
+       "mfu": 0.4483253330769635,
+       "mem_gb": 6.642644832,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 0.04781723032807853,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.013463153546666669,
+        "optimizer": 0.0005989776229792549
+       },
+       "dp_allreduce_s": 0.04036725354666667,
+       "dp_hidden_s": 0.0269041
+      },
+      null,
+      null
+     ]
+    }
+   }
+  },
+  "medium": {
+   "nvlink_ib": {
+    "best": [
+     {
+      "gpus": 8,
+      "dp": 8,
+      "tp": 1,
+      "pp": 1,
+      "mb": 8,
+      "microbatches": 8,
+      "ckpt": false,
+      "step_s": 1.1183079481677796,
+      "tokens_per_s": 468822.5643562547,
+      "tokens_per_s_per_gpu": 58602.82054453184,
+      "mfu": 0.6049838372001889,
+      "mem_gb": 18.20540416,
+      "bubble_frac": 0.0,
+      "breakdown_s": {
+       "compute": 1.1158436857380287,
+       "pipeline bubble": 0.0,
+       "tensor parallel comm": 0.0,
+       "pipeline sends": 0.0,
+       "data parallel comm (exposed)": 0.0,
+       "optimizer": 0.0024642624297509194
+      },
+      "dp_allreduce_s": 0.007311646222222222,
+      "dp_hidden_s": 0.007311646222222222,
+      "scaling_efficiency": 1.0
+     },
+     {
+      "gpus": 64,
+      "dp": 64,
+      "tp": 1,
+      "pp": 1,
+      "mb": 8,
+      "microbatches": 1,
+      "ckpt": false,
+      "step_s": 0.1411503227584664,
+      "tokens_per_s": 3714394.623788081,
+      "tokens_per_s_per_gpu": 58037.41599668877,
+      "mfu": 0.5991469063196246,
+      "mem_gb": 17.87827008,
+      "bubble_frac": 0.0,
+      "breakdown_s": {
+       "compute": 0.1394804607172536,
+       "pipeline bubble": 0.0,
+       "tensor parallel comm": 0.0,
+       "pipeline sends": 0.0,
+       "data parallel comm (exposed)": 0.0,
+       "optimizer": 0.0016698620412127939
+      },
+      "dp_allreduce_s": 0.014651292444444443,
+      "dp_hidden_s": 0.014651292444444443,
+      "scaling_efficiency": 0.9903519226107312
+     },
+     {
+      "gpus": 1024,
+      "dp": 512,
+      "tp": 2,
+      "pp": 1,
+      "mb": 1,
+      "microbatches": 1,
+      "ckpt": false,
+      "step_s": 0.02282784225685033,
+      "tokens_per_s": 22967041.479475275,
+      "tokens_per_s_per_gpu": 22428.751444800073,
+      "mfu": 0.23154230439085133,
+      "mem_gb": 2.75306228,
+      "bubble_frac": 0.0,
+      "breakdown_s": {
+       "compute": 0.020907320727194232,
+       "pipeline bubble": 0.0,
+       "tensor parallel comm": 0.0011352405333333333,
+       "pipeline sends": 0.0,
+       "data parallel comm (exposed)": 0.0,
+       "optimizer": 0.0007852809963227642
+      },
+      "dp_allreduce_s": 0.012646822222222222,
+      "dp_hidden_s": 0.012646822222222222,
+      "scaling_efficiency": 0.382724777346794
+     },
+     {
+      "gpus": 4096,
+      "dp": 512,
+      "tp": 8,
+      "pp": 1,
+      "mb": 1,
+      "microbatches": 1,
+      "ckpt": false,
+      "step_s": 0.02282714138075499,
+      "tokens_per_s": 22967746.651011437,
+      "tokens_per_s_per_gpu": 5607.360022219589,
+      "mfu": 0.05788735339500448,
+      "mem_gb": 0.68826557,
+      "bubble_frac": 0.0,
+      "breakdown_s": {
+       "compute": 0.012634309976118741,
+       "pipeline bubble": 0.0,
+       "tensor parallel comm": 0.005010670933333333,
+       "pipeline sends": 0.0,
+       "data parallel comm (exposed)": 0.004985840222222223,
+       "optimizer": 0.00019632024908069104
+      },
+      "dp_allreduce_s": 0.013401940222222223,
+      "dp_hidden_s": 0.0084161,
+      "scaling_efficiency": 0.09568413209665563
+     }
+    ],
+    "restricted": {
+     "dp": [
+      {
+       "gpus": 8,
+       "dp": 8,
+       "tp": 1,
+       "pp": 1,
+       "mb": 8,
+       "microbatches": 8,
+       "ckpt": false,
+       "step_s": 1.1183079481677796,
+       "tokens_per_s": 468822.5643562547,
+       "tokens_per_s_per_gpu": 58602.82054453184,
+       "mfu": 0.6049838372001889,
+       "mem_gb": 18.20540416,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 1.1158436857380287,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.0,
+        "optimizer": 0.0024642624297509194
+       },
+       "dp_allreduce_s": 0.007311646222222222,
+       "dp_hidden_s": 0.007311646222222222
+      },
+      {
+       "gpus": 64,
+       "dp": 64,
+       "tp": 1,
+       "pp": 1,
+       "mb": 8,
+       "microbatches": 1,
+       "ckpt": false,
+       "step_s": 0.1411503227584664,
+       "tokens_per_s": 3714394.623788081,
+       "tokens_per_s_per_gpu": 58037.41599668877,
+       "mfu": 0.5991469063196246,
+       "mem_gb": 17.87827008,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 0.1394804607172536,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.0,
+        "optimizer": 0.0016698620412127939
+       },
+       "dp_allreduce_s": 0.014651292444444443,
+       "dp_hidden_s": 0.014651292444444443
+      },
+      null,
+      null
+     ],
+     "tp+dp": [
+      {
+       "gpus": 8,
+       "dp": 8,
+       "tp": 1,
+       "pp": 1,
+       "mb": 8,
+       "microbatches": 8,
+       "ckpt": false,
+       "step_s": 1.1183079481677796,
+       "tokens_per_s": 468822.5643562547,
+       "tokens_per_s_per_gpu": 58602.82054453184,
+       "mfu": 0.6049838372001889,
+       "mem_gb": 18.20540416,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 1.1158436857380287,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.0,
+        "optimizer": 0.0024642624297509194
+       },
+       "dp_allreduce_s": 0.007311646222222222,
+       "dp_hidden_s": 0.007311646222222222
+      },
+      {
+       "gpus": 64,
+       "dp": 64,
+       "tp": 1,
+       "pp": 1,
+       "mb": 8,
+       "microbatches": 1,
+       "ckpt": false,
+       "step_s": 0.1411503227584664,
+       "tokens_per_s": 3714394.623788081,
+       "tokens_per_s_per_gpu": 58037.41599668877,
+       "mfu": 0.5991469063196246,
+       "mem_gb": 17.87827008,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 0.1394804607172536,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.0,
+        "optimizer": 0.0016698620412127939
+       },
+       "dp_allreduce_s": 0.014651292444444443,
+       "dp_hidden_s": 0.014651292444444443
+      },
+      {
+       "gpus": 1024,
+       "dp": 512,
+       "tp": 2,
+       "pp": 1,
+       "mb": 1,
+       "microbatches": 1,
+       "ckpt": false,
+       "step_s": 0.02282784225685033,
+       "tokens_per_s": 22967041.479475275,
+       "tokens_per_s_per_gpu": 22428.751444800073,
+       "mfu": 0.23154230439085133,
+       "mem_gb": 2.75306228,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 0.020907320727194232,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.0011352405333333333,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.0,
+        "optimizer": 0.0007852809963227642
+       },
+       "dp_allreduce_s": 0.012646822222222222,
+       "dp_hidden_s": 0.012646822222222222
+      },
+      {
+       "gpus": 4096,
+       "dp": 512,
+       "tp": 8,
+       "pp": 1,
+       "mb": 1,
+       "microbatches": 1,
+       "ckpt": false,
+       "step_s": 0.02282714138075499,
+       "tokens_per_s": 22967746.651011437,
+       "tokens_per_s_per_gpu": 5607.360022219589,
+       "mfu": 0.05788735339500448,
+       "mem_gb": 0.68826557,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 0.012634309976118741,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.005010670933333333,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.004985840222222223,
+        "optimizer": 0.00019632024908069104
+       },
+       "dp_allreduce_s": 0.013401940222222223,
+       "dp_hidden_s": 0.0084161
+      }
+     ],
+     "pp+dp": [
+      {
+       "gpus": 8,
+       "dp": 8,
+       "tp": 1,
+       "pp": 1,
+       "mb": 8,
+       "microbatches": 8,
+       "ckpt": false,
+       "step_s": 1.1183079481677796,
+       "tokens_per_s": 468822.5643562547,
+       "tokens_per_s_per_gpu": 58602.82054453184,
+       "mfu": 0.6049838372001889,
+       "mem_gb": 18.20540416,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 1.1158436857380287,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.0,
+        "optimizer": 0.0024642624297509194
+       },
+       "dp_allreduce_s": 0.007311646222222222,
+       "dp_hidden_s": 0.007311646222222222
+      },
+      {
+       "gpus": 64,
+       "dp": 64,
+       "tp": 1,
+       "pp": 1,
+       "mb": 8,
+       "microbatches": 1,
+       "ckpt": false,
+       "step_s": 0.1411503227584664,
+       "tokens_per_s": 3714394.623788081,
+       "tokens_per_s_per_gpu": 58037.41599668877,
+       "mfu": 0.5991469063196246,
+       "mem_gb": 17.87827008,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 0.1394804607172536,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.0,
+        "optimizer": 0.0016698620412127939
+       },
+       "dp_allreduce_s": 0.014651292444444443,
+       "dp_hidden_s": 0.014651292444444443
+      },
+      null,
+      null
+     ]
+    }
+   },
+   "pcie_ib": {
+    "best": [
+     {
+      "gpus": 8,
+      "dp": 8,
+      "tp": 1,
+      "pp": 1,
+      "mb": 8,
+      "microbatches": 8,
+      "ckpt": false,
+      "step_s": 1.1334407537677795,
+      "tokens_per_s": 462563.2158162337,
+      "tokens_per_s_per_gpu": 57820.401977029214,
+      "mfu": 0.5969065709036849,
+      "mem_gb": 18.20540416,
+      "bubble_frac": 0.0,
+      "breakdown_s": {
+       "compute": 1.1158436857380287,
+       "pipeline bubble": 0.0,
+       "tensor parallel comm": 0.0,
+       "pipeline sends": 0.0,
+       "data parallel comm (exposed)": 0.015132805600000007,
+       "optimizer": 0.0024642624297509194
+      },
+      "dp_allreduce_s": 0.1048229056,
+      "dp_hidden_s": 0.0896901,
+      "scaling_efficiency": 1.0
+     },
+     {
+      "gpus": 64,
+      "dp": 64,
+      "tp": 1,
+      "pp": 1,
+      "mb": 8,
+      "microbatches": 1,
+      "ckpt": false,
+      "step_s": 0.1636227745806886,
+      "tokens_per_s": 3204248.316553596,
+      "tokens_per_s_per_gpu": 50066.37994614994,
+      "mfu": 0.516858239468657,
+      "mem_gb": 17.87827008,
+      "bubble_frac": 0.0,
+      "breakdown_s": {
+       "compute": 0.1394804607172536,
+       "pipeline bubble": 0.0,
+       "tensor parallel comm": 0.0,
+       "pipeline sends": 0.0,
+       "data parallel comm (exposed)": 0.022472451822222225,
+       "optimizer": 0.0016698620412127939
+      },
+      "dp_allreduce_s": 0.11216255182222222,
+      "dp_hidden_s": 0.0896901,
+      "scaling_efficiency": 0.8658947055753818
+     },
+     {
+      "gpus": 1024,
+      "dp": 128,
+      "tp": 2,
+      "pp": 4,
+      "mb": 1,
+      "microbatches": 4,
+      "ckpt": false,
+      "step_s": 0.06173825228268512,
+      "tokens_per_s": 8492109.520681068,
+      "tokens_per_s_per_gpu": 8293.075703790106,
+      "mfu": 0.08561323012871164,
+      "mem_gb": 1.35105908,
+      "bubble_frac": 0.42857142857142855,
+      "breakdown_s": {
+       "compute": 0.020907320727194232,
+       "pipeline bubble": 0.015680490545395675,
+       "tensor parallel comm": 0.01745286144,
+       "pipeline sends": 0.00131440512,
+       "data parallel comm (exposed)": 0.006181534555555555,
+       "optimizer": 0.0002016398945396517
+      },
+      "dp_allreduce_s": 0.009513259555555556,
+      "dp_hidden_s": 0.0033317250000000002,
+      "scaling_efficiency": 0.14342819178401361
+     },
+     {
+      "gpus": 4096,
+      "dp": 512,
+      "tp": 8,
+      "pp": 1,
+      "mb": 1,
+      "microbatches": 1,
+      "ckpt": false,
+      "step_s": 0.04534933188742166,
+      "tokens_per_s": 11561096.452347502,
+      "tokens_per_s_per_gpu": 2822.533313561402,
+      "mfu": 0.029138307999461533,
+      "mem_gb": 0.68826557,
+      "bubble_frac": 0.0,
+      "breakdown_s": {
+       "compute": 0.012634309976118741,
+       "pipeline bubble": 0.0,
+       "tensor parallel comm": 0.027532861439999997,
+       "pipeline sends": 0.0,
+       "data parallel comm (exposed)": 0.004985840222222223,
+       "optimizer": 0.00019632024908069104
+      },
+      "dp_allreduce_s": 0.013401940222222223,
+      "dp_hidden_s": 0.0084161,
+      "scaling_efficiency": 0.04881552561123205
+     }
+    ],
+    "restricted": {
+     "dp": [
+      {
+       "gpus": 8,
+       "dp": 8,
+       "tp": 1,
+       "pp": 1,
+       "mb": 8,
+       "microbatches": 8,
+       "ckpt": false,
+       "step_s": 1.1334407537677795,
+       "tokens_per_s": 462563.2158162337,
+       "tokens_per_s_per_gpu": 57820.401977029214,
+       "mfu": 0.5969065709036849,
+       "mem_gb": 18.20540416,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 1.1158436857380287,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.015132805600000007,
+        "optimizer": 0.0024642624297509194
+       },
+       "dp_allreduce_s": 0.1048229056,
+       "dp_hidden_s": 0.0896901
+      },
+      {
+       "gpus": 64,
+       "dp": 64,
+       "tp": 1,
+       "pp": 1,
+       "mb": 8,
+       "microbatches": 1,
+       "ckpt": false,
+       "step_s": 0.1636227745806886,
+       "tokens_per_s": 3204248.316553596,
+       "tokens_per_s_per_gpu": 50066.37994614994,
+       "mfu": 0.516858239468657,
+       "mem_gb": 17.87827008,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 0.1394804607172536,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.022472451822222225,
+        "optimizer": 0.0016698620412127939
+       },
+       "dp_allreduce_s": 0.11216255182222222,
+       "dp_hidden_s": 0.0896901
+      },
+      null,
+      null
+     ],
+     "tp+dp": [
+      {
+       "gpus": 8,
+       "dp": 8,
+       "tp": 1,
+       "pp": 1,
+       "mb": 8,
+       "microbatches": 8,
+       "ckpt": false,
+       "step_s": 1.1334407537677795,
+       "tokens_per_s": 462563.2158162337,
+       "tokens_per_s_per_gpu": 57820.401977029214,
+       "mfu": 0.5969065709036849,
+       "mem_gb": 18.20540416,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 1.1158436857380287,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.015132805600000007,
+        "optimizer": 0.0024642624297509194
+       },
+       "dp_allreduce_s": 0.1048229056,
+       "dp_hidden_s": 0.0896901
+      },
+      {
+       "gpus": 64,
+       "dp": 64,
+       "tp": 1,
+       "pp": 1,
+       "mb": 8,
+       "microbatches": 1,
+       "ckpt": false,
+       "step_s": 0.1636227745806886,
+       "tokens_per_s": 3204248.316553596,
+       "tokens_per_s_per_gpu": 50066.37994614994,
+       "mfu": 0.516858239468657,
+       "mem_gb": 17.87827008,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 0.1394804607172536,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.022472451822222225,
+        "optimizer": 0.0016698620412127939
+       },
+       "dp_allreduce_s": 0.11216255182222222,
+       "dp_hidden_s": 0.0896901
+      },
+      {
+       "gpus": 1024,
+       "dp": 256,
+       "tp": 4,
+       "pp": 1,
+       "mb": 2,
+       "microbatches": 1,
+       "ckpt": false,
+       "step_s": 0.06256107683362885,
+       "tokens_per_s": 8380418.409265234,
+       "tokens_per_s_per_gpu": 8184.00235279808,
+       "mfu": 0.08448721582076045,
+       "mem_gb": 1.81839348,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 0.019063038509605945,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.02991919104,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.013182660355555554,
+        "optimizer": 0.0003961869284673558
+       },
+       "dp_allreduce_s": 0.024487960355555553,
+       "dp_hidden_s": 0.011305299999999999
+      },
+      {
+       "gpus": 4096,
+       "dp": 512,
+       "tp": 8,
+       "pp": 1,
+       "mb": 1,
+       "microbatches": 1,
+       "ckpt": false,
+       "step_s": 0.04534933188742166,
+       "tokens_per_s": 11561096.452347502,
+       "tokens_per_s_per_gpu": 2822.533313561402,
+       "mfu": 0.029138307999461533,
+       "mem_gb": 0.68826557,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 0.012634309976118741,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.027532861439999997,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.004985840222222223,
+        "optimizer": 0.00019632024908069104
+       },
+       "dp_allreduce_s": 0.013401940222222223,
+       "dp_hidden_s": 0.0084161
+      }
+     ],
+     "pp+dp": [
+      {
+       "gpus": 8,
+       "dp": 8,
+       "tp": 1,
+       "pp": 1,
+       "mb": 8,
+       "microbatches": 8,
+       "ckpt": false,
+       "step_s": 1.1334407537677795,
+       "tokens_per_s": 462563.2158162337,
+       "tokens_per_s_per_gpu": 57820.401977029214,
+       "mfu": 0.5969065709036849,
+       "mem_gb": 18.20540416,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 1.1158436857380287,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.015132805600000007,
+        "optimizer": 0.0024642624297509194
+       },
+       "dp_allreduce_s": 0.1048229056,
+       "dp_hidden_s": 0.0896901
+      },
+      {
+       "gpus": 64,
+       "dp": 64,
+       "tp": 1,
+       "pp": 1,
+       "mb": 8,
+       "microbatches": 1,
+       "ckpt": false,
+       "step_s": 0.1636227745806886,
+       "tokens_per_s": 3204248.316553596,
+       "tokens_per_s_per_gpu": 50066.37994614994,
+       "mfu": 0.516858239468657,
+       "mem_gb": 17.87827008,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 0.1394804607172536,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.022472451822222225,
+        "optimizer": 0.0016698620412127939
+       },
+       "dp_allreduce_s": 0.11216255182222222,
+       "dp_hidden_s": 0.0896901
+      },
+      null,
+      null
+     ]
+    }
+   }
+  },
+  "large": {
+   "nvlink_ib": {
+    "best": [
+     {
+      "gpus": 8,
+      "dp": 4,
+      "tp": 1,
+      "pp": 2,
+      "mb": 8,
+      "microbatches": 16,
+      "ckpt": false,
+      "step_s": 2.282226748811958,
+      "tokens_per_s": 229726.51611980482,
+      "tokens_per_s_per_gpu": 28715.814514975602,
+      "mfu": 0.7135758379119942,
+      "mem_gb": 24.434323456,
+      "bubble_frac": 0.058823529411764705,
+      "breakdown_s": {
+       "compute": 2.140906920669219,
+       "pipeline bubble": 0.13380668254182618,
+       "tensor parallel comm": 0.0,
+       "pipeline sends": 0.003271029688888889,
+       "data parallel comm (exposed)": 0.0,
+       "optimizer": 0.004242115912023867
+      },
+      "dp_allreduce_s": 0.007856668800000001,
+      "dp_hidden_s": 0.007856668800000001,
+      "scaling_efficiency": 1.0
+     },
+     {
+      "gpus": 64,
+      "dp": 64,
+      "tp": 1,
+      "pp": 1,
+      "mb": 8,
+      "microbatches": 1,
+      "ckpt": false,
+      "step_s": 0.2718146914195991,
+      "tokens_per_s": 1928843.4972437124,
+      "tokens_per_s_per_gpu": 30138.179644433007,
+      "mfu": 0.7489210094215837,
+      "mem_gb": 28.314464512,
+      "bubble_frac": 0.0,
+      "breakdown_s": {
+       "compute": 0.26761336508365235,
+       "pipeline bubble": 0.0,
+       "tensor parallel comm": 0.0,
+       "pipeline sends": 0.0,
+       "data parallel comm (exposed)": 0.0,
+       "optimizer": 0.004201326335946714
+      },
+      "dp_allreduce_s": 0.0366924544,
+      "dp_hidden_s": 0.0366924544,
+      "scaling_efficiency": 1.0495324668125163
+     },
+     {
+      "gpus": 1024,
+      "dp": 512,
+      "tp": 2,
+      "pp": 1,
+      "mb": 1,
+      "microbatches": 1,
+      "ckpt": false,
+      "step_s": 0.04467545808710596,
+      "tokens_per_s": 11735481.23396451,
+      "tokens_per_s_per_gpu": 11460.430892543467,
+      "mfu": 0.28478685752460037,
+      "mem_gb": 5.884955152,
+      "bubble_frac": 0.0,
+      "breakdown_s": {
+       "compute": 0.02852897895142444,
+       "pipeline bubble": 0.0,
+       "tensor parallel comm": 0.0011296540444444446,
+       "pipeline sends": 0.0,
+       "data parallel comm (exposed)": 0.013041080000000004,
+       "optimizer": 0.0019757450912370775
+      },
+      "dp_allreduce_s": 0.02986648,
+      "dp_hidden_s": 0.016825399999999997,
+      "scaling_efficiency": 0.3990982351054932
+     },
+     {
+      "gpus": 4096,
+      "dp": 512,
+      "tp": 8,
+      "pp": 1,
+      "mb": 1,
+      "microbatches": 1,
+      "ckpt": false,
+      "step_s": 0.03504246986091937,
+      "tokens_per_s": 14961502.48772005,
+      "tokens_per_s_per_gpu": 3652.710568291028,
+      "mfu": 0.0907683117628078,
+      "mem_gb": 1.471238788,
+      "bubble_frac": 0.0,
+      "breakdown_s": {
+       "compute": 0.013563248610332323,
+       "pipeline bubble": 0.0,
+       "tensor parallel comm": 0.003992894577777777,
+       "pipeline sends": 0.0,
+       "data parallel comm (exposed)": 0.0169923904,
+       "optimizer": 0.0004939362728092694
+      },
+      "dp_allreduce_s": 0.0259722904,
+      "dp_hidden_s": 0.0089799,
+      "scaling_efficiency": 0.12720205329318102
+     }
+    ],
+    "restricted": {
+     "dp": [
+      {
+       "gpus": 8,
+       "dp": 8,
+       "tp": 1,
+       "pp": 1,
+       "mb": 4,
+       "microbatches": 16,
+       "ckpt": false,
+       "step_s": 2.367982281110542,
+       "tokens_per_s": 221407.06211455187,
+       "tokens_per_s_per_gpu": 27675.882764318983,
+       "mfu": 0.6877339740164364,
+       "mem_gb": 19.742283776,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 2.3617822655468146,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.0,
+        "optimizer": 0.0062000155637271905
+       },
+       "dp_allreduce_s": 0.0183322272,
+       "dp_hidden_s": 0.0183322272
+      },
+      {
+       "gpus": 64,
+       "dp": 64,
+       "tp": 1,
+       "pp": 1,
+       "mb": 8,
+       "microbatches": 1,
+       "ckpt": false,
+       "step_s": 0.2718146914195991,
+       "tokens_per_s": 1928843.4972437124,
+       "tokens_per_s_per_gpu": 30138.179644433007,
+       "mfu": 0.7489210094215837,
+       "mem_gb": 28.314464512,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 0.26761336508365235,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.0,
+        "optimizer": 0.004201326335946714
+       },
+       "dp_allreduce_s": 0.0366924544,
+       "dp_hidden_s": 0.0366924544
+      },
+      null,
+      null
+     ],
+     "tp+dp": [
+      {
+       "gpus": 8,
+       "dp": 4,
+       "tp": 2,
+       "pp": 1,
+       "mb": 16,
+       "microbatches": 8,
+       "ckpt": false,
+       "step_s": 2.360864351294438,
+       "tokens_per_s": 222074.5972603374,
+       "tokens_per_s_per_gpu": 27759.324657542176,
+       "mfu": 0.68980746974969,
+       "mem_gb": 24.434323456,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 2.258106517693525,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.09851571768888889,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.0,
+        "optimizer": 0.004242115912023867
+       },
+       "dp_allreduce_s": 0.007856668800000001,
+       "dp_hidden_s": 0.007856668800000001
+      },
+      {
+       "gpus": 64,
+       "dp": 64,
+       "tp": 1,
+       "pp": 1,
+       "mb": 8,
+       "microbatches": 1,
+       "ckpt": false,
+       "step_s": 0.2718146914195991,
+       "tokens_per_s": 1928843.4972437124,
+       "tokens_per_s_per_gpu": 30138.179644433007,
+       "mfu": 0.7489210094215837,
+       "mem_gb": 28.314464512,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 0.26761336508365235,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.0,
+        "optimizer": 0.004201326335946714
+       },
+       "dp_allreduce_s": 0.0366924544,
+       "dp_hidden_s": 0.0366924544
+      },
+      {
+       "gpus": 1024,
+       "dp": 512,
+       "tp": 2,
+       "pp": 1,
+       "mb": 1,
+       "microbatches": 1,
+       "ckpt": false,
+       "step_s": 0.04467545808710596,
+       "tokens_per_s": 11735481.23396451,
+       "tokens_per_s_per_gpu": 11460.430892543467,
+       "mfu": 0.28478685752460037,
+       "mem_gb": 5.884955152,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 0.02852897895142444,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.0011296540444444446,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.013041080000000004,
+        "optimizer": 0.0019757450912370775
+       },
+       "dp_allreduce_s": 0.02986648,
+       "dp_hidden_s": 0.016825399999999997
+      },
+      {
+       "gpus": 4096,
+       "dp": 512,
+       "tp": 8,
+       "pp": 1,
+       "mb": 1,
+       "microbatches": 1,
+       "ckpt": false,
+       "step_s": 0.03504246986091937,
+       "tokens_per_s": 14961502.48772005,
+       "tokens_per_s_per_gpu": 3652.710568291028,
+       "mfu": 0.0907683117628078,
+       "mem_gb": 1.471238788,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 0.013563248610332323,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.003992894577777777,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.0169923904,
+        "optimizer": 0.0004939362728092694
+       },
+       "dp_allreduce_s": 0.0259722904,
+       "dp_hidden_s": 0.0089799
+      }
+     ],
+     "pp+dp": [
+      {
+       "gpus": 8,
+       "dp": 4,
+       "tp": 1,
+       "pp": 2,
+       "mb": 8,
+       "microbatches": 16,
+       "ckpt": false,
+       "step_s": 2.282226748811958,
+       "tokens_per_s": 229726.51611980482,
+       "tokens_per_s_per_gpu": 28715.814514975602,
+       "mfu": 0.7135758379119942,
+       "mem_gb": 24.434323456,
+       "bubble_frac": 0.058823529411764705,
+       "breakdown_s": {
+        "compute": 2.140906920669219,
+        "pipeline bubble": 0.13380668254182618,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.003271029688888889,
+        "data parallel comm (exposed)": 0.0,
+        "optimizer": 0.004242115912023867
+       },
+       "dp_allreduce_s": 0.007856668800000001,
+       "dp_hidden_s": 0.007856668800000001
+      },
+      {
+       "gpus": 64,
+       "dp": 64,
+       "tp": 1,
+       "pp": 1,
+       "mb": 8,
+       "microbatches": 1,
+       "ckpt": false,
+       "step_s": 0.2718146914195991,
+       "tokens_per_s": 1928843.4972437124,
+       "tokens_per_s_per_gpu": 30138.179644433007,
+       "mfu": 0.7489210094215837,
+       "mem_gb": 28.314464512,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 0.26761336508365235,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.0,
+        "optimizer": 0.004201326335946714
+       },
+       "dp_allreduce_s": 0.0366924544,
+       "dp_hidden_s": 0.0366924544
+      },
+      null,
+      null
+     ]
+    }
+   },
+   "pcie_ib": {
+    "best": [
+     {
+      "gpus": 8,
+      "dp": 4,
+      "tp": 1,
+      "pp": 2,
+      "mb": 8,
+      "microbatches": 16,
+      "ckpt": false,
+      "step_s": 2.353988227363069,
+      "tokens_per_s": 222723.28888717762,
+      "tokens_per_s_per_gpu": 27840.411110897203,
+      "mfu": 0.6918224337990625,
+      "mem_gb": 24.434323456,
+      "bubble_frac": 0.058823529411764705,
+      "breakdown_s": {
+       "compute": 2.140906920669219,
+       "pipeline bubble": 0.13380668254182618,
+       "tensor parallel comm": 0.0,
+       "pipeline sends": 0.045974027519999995,
+       "data parallel comm (exposed)": 0.02905848072,
+       "optimizer": 0.004242115912023867
+      },
+      "dp_allreduce_s": 0.11293683072,
+      "dp_hidden_s": 0.08387835,
+      "scaling_efficiency": 1.0
+     },
+     {
+      "gpus": 64,
+      "dp": 64,
+      "tp": 1,
+      "pp": 1,
+      "mb": 8,
+      "microbatches": 1,
+      "ckpt": false,
+      "step_s": 0.3859374902995991,
+      "tokens_per_s": 1358479.062484966,
+      "tokens_per_s_per_gpu": 21226.235351327592,
+      "mfu": 0.5274629653510857,
+      "mem_gb": 28.314464512,
+      "bubble_frac": 0.0,
+      "breakdown_s": {
+       "compute": 0.26761336508365235,
+       "pipeline bubble": 0.0,
+       "tensor parallel comm": 0.0,
+       "pipeline sends": 0.0,
+       "data parallel comm (exposed)": 0.11412279888000001,
+       "optimizer": 0.004201326335946714
+      },
+      "dp_allreduce_s": 0.28187949888,
+      "dp_hidden_s": 0.1677567,
+      "scaling_efficiency": 0.7624253559610435
+     },
+     {
+      "gpus": 1024,
+      "dp": 64,
+      "tp": 2,
+      "pp": 8,
+      "mb": 1,
+      "microbatches": 8,
+      "ckpt": false,
+      "step_s": 0.08804835809658415,
+      "tokens_per_s": 5954546.0169159,
+      "tokens_per_s_per_gpu": 5814.986344644433,
+      "mfu": 0.14449994971107238,
+      "mem_gb": 1.769654032,
+      "bubble_frac": 0.4666666666666667,
+      "breakdown_s": {
+       "compute": 0.02852897895142444,
+       "pipeline bubble": 0.024962856582496383,
+       "tensor parallel comm": 0.0225326592,
+       "pipeline sends": 0.0029462026666666665,
+       "data parallel comm (exposed)": 0.008815077800000001,
+       "optimizer": 0.00026258289599666963
+      },
+      "dp_allreduce_s": 0.0109182528,
+      "dp_hidden_s": 0.0021031749999999997,
+      "scaling_efficiency": 0.20886855159866335
+     },
+     {
+      "gpus": 4096,
+      "dp": 512,
+      "tp": 8,
+      "pp": 1,
+      "mb": 1,
+      "microbatches": 1,
+      "ckpt": false,
+      "step_s": 0.0588000572031416,
+      "tokens_per_s": 8916453.910728306,
+      "tokens_per_s_per_gpu": 2176.8686305489027,
+      "mfu": 0.05409426419919848,
+      "mem_gb": 1.471238788,
+      "bubble_frac": 0.0,
+      "breakdown_s": {
+       "compute": 0.013563248610332323,
+       "pipeline bubble": 0.0,
+       "tensor parallel comm": 0.02775048192,
+       "pipeline sends": 0.0,
+       "data parallel comm (exposed)": 0.0169923904,
+       "optimizer": 0.0004939362728092694
+      },
+      "dp_allreduce_s": 0.0259722904,
+      "dp_hidden_s": 0.0089799,
+      "scaling_efficiency": 0.07819096571087773
+     }
+    ],
+    "restricted": {
+     "dp": [
+      {
+       "gpus": 8,
+       "dp": 8,
+       "tp": 1,
+       "pp": 1,
+       "mb": 4,
+       "microbatches": 16,
+       "ckpt": false,
+       "step_s": 2.538251952790542,
+       "tokens_per_s": 206554.7509669402,
+       "tokens_per_s_per_gpu": 25819.343870867524,
+       "mfu": 0.6415997682177487,
+       "mem_gb": 19.742283776,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 2.3617822655468146,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.17026967168,
+        "optimizer": 0.0062000155637271905
+       },
+       "dp_allreduce_s": 0.26351927168,
+       "dp_hidden_s": 0.0932496
+      },
+      {
+       "gpus": 64,
+       "dp": 64,
+       "tp": 1,
+       "pp": 1,
+       "mb": 8,
+       "microbatches": 1,
+       "ckpt": false,
+       "step_s": 0.3859374902995991,
+       "tokens_per_s": 1358479.062484966,
+       "tokens_per_s_per_gpu": 21226.235351327592,
+       "mfu": 0.5274629653510857,
+       "mem_gb": 28.314464512,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 0.26761336508365235,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.11412279888000001,
+        "optimizer": 0.004201326335946714
+       },
+       "dp_allreduce_s": 0.28187949888,
+       "dp_hidden_s": 0.1677567
+      },
+      null,
+      null
+     ],
+     "tp+dp": [
+      {
+       "gpus": 8,
+       "dp": 8,
+       "tp": 1,
+       "pp": 1,
+       "mb": 4,
+       "microbatches": 16,
+       "ckpt": false,
+       "step_s": 2.538251952790542,
+       "tokens_per_s": 206554.7509669402,
+       "tokens_per_s_per_gpu": 25819.343870867524,
+       "mfu": 0.6415997682177487,
+       "mem_gb": 19.742283776,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 2.3617822655468146,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.17026967168,
+        "optimizer": 0.0062000155637271905
+       },
+       "dp_allreduce_s": 0.26351927168,
+       "dp_hidden_s": 0.0932496
+      },
+      {
+       "gpus": 64,
+       "dp": 64,
+       "tp": 1,
+       "pp": 1,
+       "mb": 8,
+       "microbatches": 1,
+       "ckpt": false,
+       "step_s": 0.3859374902995991,
+       "tokens_per_s": 1358479.062484966,
+       "tokens_per_s_per_gpu": 21226.235351327592,
+       "mfu": 0.5274629653510857,
+       "mem_gb": 28.314464512,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 0.26761336508365235,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.11412279888000001,
+        "optimizer": 0.004201326335946714
+       },
+       "dp_allreduce_s": 0.28187949888,
+       "dp_hidden_s": 0.1677567
+      },
+      {
+       "gpus": 1024,
+       "dp": 256,
+       "tp": 4,
+       "pp": 1,
+       "mb": 2,
+       "microbatches": 1,
+       "ckpt": false,
+       "step_s": 0.1126524503537676,
+       "tokens_per_s": 4654031.033977109,
+       "tokens_per_s_per_gpu": 4544.9521816182705,
+       "mfu": 0.11294013824949514,
+       "mem_gb": 3.533354512,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 0.043028878928382176,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.036052254719999996,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.032574521440000004,
+        "optimizer": 0.0009967952653854159
+       },
+       "dp_allreduce_s": 0.05965542144,
+       "dp_hidden_s": 0.027080899999999998
+      },
+      {
+       "gpus": 4096,
+       "dp": 512,
+       "tp": 8,
+       "pp": 1,
+       "mb": 1,
+       "microbatches": 1,
+       "ckpt": false,
+       "step_s": 0.0588000572031416,
+       "tokens_per_s": 8916453.910728306,
+       "tokens_per_s_per_gpu": 2176.8686305489027,
+       "mfu": 0.05409426419919848,
+       "mem_gb": 1.471238788,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 0.013563248610332323,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.02775048192,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.0169923904,
+        "optimizer": 0.0004939362728092694
+       },
+       "dp_allreduce_s": 0.0259722904,
+       "dp_hidden_s": 0.0089799
+      }
+     ],
+     "pp+dp": [
+      {
+       "gpus": 8,
+       "dp": 4,
+       "tp": 1,
+       "pp": 2,
+       "mb": 8,
+       "microbatches": 16,
+       "ckpt": false,
+       "step_s": 2.353988227363069,
+       "tokens_per_s": 222723.28888717762,
+       "tokens_per_s_per_gpu": 27840.411110897203,
+       "mfu": 0.6918224337990625,
+       "mem_gb": 24.434323456,
+       "bubble_frac": 0.058823529411764705,
+       "breakdown_s": {
+        "compute": 2.140906920669219,
+        "pipeline bubble": 0.13380668254182618,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.045974027519999995,
+        "data parallel comm (exposed)": 0.02905848072,
+        "optimizer": 0.004242115912023867
+       },
+       "dp_allreduce_s": 0.11293683072,
+       "dp_hidden_s": 0.08387835
+      },
+      {
+       "gpus": 64,
+       "dp": 64,
+       "tp": 1,
+       "pp": 1,
+       "mb": 8,
+       "microbatches": 1,
+       "ckpt": false,
+       "step_s": 0.3859374902995991,
+       "tokens_per_s": 1358479.062484966,
+       "tokens_per_s_per_gpu": 21226.235351327592,
+       "mfu": 0.5274629653510857,
+       "mem_gb": 28.314464512,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 0.26761336508365235,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.11412279888000001,
+        "optimizer": 0.004201326335946714
+       },
+       "dp_allreduce_s": 0.28187949888,
+       "dp_hidden_s": 0.1677567
+      },
+      null,
+      null
+     ]
+    }
+   }
+  },
+  "llama3-8b": {
+   "nvlink_ib": {
+    "best": [
+     {
+      "gpus": 8,
+      "dp": 1,
+      "tp": 4,
+      "pp": 2,
+      "mb": 1,
+      "microbatches": 1024,
+      "ckpt": false,
+      "step_s": 175.69962529269853,
+      "tokens_per_s": 23872.014485020653,
+      "tokens_per_s_per_gpu": 2984.0018106275816,
+      "mfu": 0.6751320357846373,
+      "mem_gb": 27.463328768,
+      "bubble_frac": 0.000975609756097561,
+      "breakdown_s": {
+       "compute": 164.96527874521348,
+       "pipeline bubble": 0.16109890502462254,
+       "tensor parallel comm": 10.352344746666667,
+       "pipeline sends": 0.1972238488888889,
+       "data parallel comm (exposed)": 0.0,
+       "optimizer": 0.023679046904877543
+      },
+      "dp_allreduce_s": 0.0,
+      "dp_hidden_s": 0.0,
+      "scaling_efficiency": 1.0
+     },
+     {
+      "gpus": 64,
+      "dp": 4,
+      "tp": 2,
+      "pp": 8,
+      "mb": 1,
+      "microbatches": 256,
+      "ckpt": false,
+      "step_s": 20.21849656734162,
+      "tokens_per_s": 207448.85684403178,
+      "tokens_per_s_per_gpu": 3241.3883881879965,
+      "mfu": 0.7333658892203554,
+      "mem_gb": 24.813177856,
+      "bubble_frac": 0.026615969581749048,
+      "breakdown_s": {
+       "compute": 18.864381291304458,
+       "pipeline bubble": 0.5158229259341063,
+       "tensor parallel comm": 0.41746202737777777,
+       "pipeline sends": 0.3948440273777778,
+       "data parallel comm (exposed)": 0.021459418733333332,
+       "optimizer": 0.004526876614167765
+      },
+      "dp_allreduce_s": 0.06694884373333333,
+      "dp_hidden_s": 0.045489425,
+      "scaling_efficiency": 1.0862555031447125
+     },
+     {
+      "gpus": 1024,
+      "dp": 128,
+      "tp": 8,
+      "pp": 1,
+      "mb": 2,
+      "microbatches": 4,
+      "ckpt": false,
+      "step_s": 1.5282615451053851,
+      "tokens_per_s": 2744493.5805871966,
+      "tokens_per_s_per_gpu": 2680.169512292184,
+      "mfu": 0.6063898127130097,
+      "mem_gb": 19.495803936,
+      "bubble_frac": 0.0,
+      "breakdown_s": {
+       "compute": 1.335400037004544,
+       "pipeline bubble": 0.0,
+       "tensor parallel comm": 0.18853050595555554,
+       "pipeline sends": 0.0,
+       "data parallel comm (exposed)": 0.0,
+       "optimizer": 0.0043310021452855054
+      },
+      "dp_allreduce_s": 0.17832610737777776,
+      "dp_hidden_s": 0.17832610737777776,
+      "scaling_efficiency": 0.8981795864689852
+     },
+     {
+      "gpus": 4096,
+      "dp": 512,
+      "tp": 8,
+      "pp": 1,
+      "mb": 2,
+      "microbatches": 1,
+      "ckpt": false,
+      "step_s": 0.3851993777784624,
+      "tokens_per_s": 10888657.256378662,
+      "tokens_per_s_per_gpu": 2658.3635879830717,
+      "mfu": 0.6014562104549466,
+      "mem_gb": 19.448751624,
+      "bubble_frac": 0.0,
+      "breakdown_s": {
+       "compute": 0.333850009251136,
+       "pipeline bubble": 0.0,
+       "tensor parallel comm": 0.047132626488888885,
+       "pipeline sends": 0.0,
+       "data parallel comm (exposed)": 0.0,
+       "optimizer": 0.004216742038437521
+      },
+      "dp_allreduce_s": 0.1832117143111111,
+      "dp_hidden_s": 0.1832117143111111,
+      "scaling_efficiency": 0.8908719755179964
+     }
+    ],
+    "restricted": {
+     "dp": [
+      null,
+      null,
+      null,
+      null
+     ],
+     "tp+dp": [
+      {
+       "gpus": 8,
+       "dp": 1,
+       "tp": 8,
+       "pp": 1,
+       "mb": 2,
+       "microbatches": 512,
+       "ckpt": false,
+       "step_s": 195.08678854579762,
+       "tokens_per_s": 21499.682429881024,
+       "tokens_per_s_per_gpu": 2687.460303735128,
+       "mfu": 0.6080393582500887,
+       "mem_gb": 27.463328768,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 170.93120473658163,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 24.13190476231111,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.0,
+        "optimizer": 0.023679046904877543
+       },
+       "dp_allreduce_s": 0.0,
+       "dp_hidden_s": 0.0
+      },
+      {
+       "gpus": 64,
+       "dp": 8,
+       "tp": 8,
+       "pp": 1,
+       "mb": 2,
+       "microbatches": 64,
+       "ckpt": false,
+       "step_s": 24.38950489164384,
+       "tokens_per_s": 171971.6746458852,
+       "tokens_per_s_per_gpu": 2687.0574163419565,
+       "mfu": 0.6079482047578303,
+       "mem_gb": 20.436850176,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 21.366400592072704,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 3.0164880952888886,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.0,
+        "optimizer": 0.006616204282245195
+       },
+       "dp_allreduce_s": 0.1562139687111111,
+       "dp_hidden_s": 0.1562139687111111
+      },
+      {
+       "gpus": 1024,
+       "dp": 128,
+       "tp": 8,
+       "pp": 1,
+       "mb": 2,
+       "microbatches": 4,
+       "ckpt": false,
+       "step_s": 1.5282615451053851,
+       "tokens_per_s": 2744493.5805871966,
+       "tokens_per_s_per_gpu": 2680.169512292184,
+       "mfu": 0.6063898127130097,
+       "mem_gb": 19.495803936,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 1.335400037004544,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.18853050595555554,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.0,
+        "optimizer": 0.0043310021452855054
+       },
+       "dp_allreduce_s": 0.17832610737777776,
+       "dp_hidden_s": 0.17832610737777776
+      },
+      {
+       "gpus": 4096,
+       "dp": 512,
+       "tp": 8,
+       "pp": 1,
+       "mb": 2,
+       "microbatches": 1,
+       "ckpt": false,
+       "step_s": 0.3851993777784624,
+       "tokens_per_s": 10888657.256378662,
+       "tokens_per_s_per_gpu": 2658.3635879830717,
+       "mfu": 0.6014562104549466,
+       "mem_gb": 19.448751624,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 0.333850009251136,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.047132626488888885,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.0,
+        "optimizer": 0.004216742038437521
+       },
+       "dp_allreduce_s": 0.1832117143111111,
+       "dp_hidden_s": 0.1832117143111111
+      }
+     ],
+     "pp+dp": [
+      null,
+      {
+       "gpus": 64,
+       "dp": 8,
+       "tp": 1,
+       "pp": 8,
+       "mb": 1,
+       "microbatches": 128,
+       "ckpt": true,
+       "step_s": 24.981269240154056,
+       "tokens_per_s": 167897.9542503876,
+       "tokens_per_s_per_gpu": 2623.405535162306,
+       "mfu": 0.5935469319538766,
+       "mem_gb": 22.68499712,
+       "bubble_frac": 0.05185185185185185,
+       "breakdown_s": {
+        "compute": 23.63331110462644,
+        "pipeline bubble": 1.2924467010342584,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.025975824,
+        "data parallel comm (exposed)": 0.022919406211111076,
+        "optimizer": 0.006616204282245195
+       },
+       "dp_allreduce_s": 0.1562139687111111,
+       "dp_hidden_s": 0.13329456250000002
+      },
+      {
+       "gpus": 1024,
+       "dp": 128,
+       "tp": 1,
+       "pp": 8,
+       "mb": 1,
+       "microbatches": 8,
+       "ckpt": true,
+       "step_s": 2.821777394763141,
+       "tokens_per_s": 1486404.9899131283,
+       "tokens_per_s_per_gpu": 1451.5673729620394,
+       "mfu": 0.3284179091635038,
+       "mem_gb": 21.74395088,
+       "bubble_frac": 0.4666666666666667,
+       "breakdown_s": {
+        "compute": 1.4770819440391525,
+        "pipeline bubble": 1.2924467010342584,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.002886202666666667,
+        "data parallel comm (exposed)": 0.045031544877777746,
+        "optimizer": 0.0043310021452855054
+       },
+       "dp_allreduce_s": 0.17832610737777776,
+       "dp_hidden_s": 0.13329456250000002
+      },
+      null
+     ]
+    }
+   },
+   "pcie_ib": {
+    "best": [
+     {
+      "gpus": 8,
+      "dp": 1,
+      "tp": 2,
+      "pp": 4,
+      "mb": 1,
+      "microbatches": 1024,
+      "ckpt": true,
+      "step_s": 256.5028143268955,
+      "tokens_per_s": 16351.882964740666,
+      "tokens_per_s_per_gpu": 2043.9853705925832,
+      "mfu": 0.4624528039652766,
+      "mem_gb": 23.88978176,
+      "bubble_frac": 0.0029211295034079843,
+      "breakdown_s": {
+       "compute": 208.32484233043567,
+       "pipeline bubble": 0.6103266865149483,
+       "tensor parallel comm": 44.76659412992,
+       "pipeline sends": 2.77737213312,
+       "data parallel comm (exposed)": 0.0,
+       "optimizer": 0.023679046904877543
+      },
+      "dp_allreduce_s": 0.0,
+      "dp_hidden_s": 0.0,
+      "scaling_efficiency": 1.0
+     },
+     {
+      "gpus": 64,
+      "dp": 8,
+      "tp": 1,
+      "pp": 8,
+      "mb": 1,
+      "microbatches": 128,
+      "ckpt": true,
+      "step_s": 25.32038128175406,
+      "tokens_per_s": 165649.32231184162,
+      "tokens_per_s_per_gpu": 2588.2706611225253,
+      "mfu": 0.5855976475556461,
+      "mem_gb": 22.68499712,
+      "bubble_frac": 0.05185185185185185,
+      "breakdown_s": {
+       "compute": 23.63331110462644,
+       "pipeline bubble": 1.2924467010342584,
+       "tensor parallel comm": 0.0,
+       "pipeline sends": 0.3650878656,
+       "data parallel comm (exposed)": 0.022919406211111076,
+       "optimizer": 0.006616204282245195
+      },
+      "dp_allreduce_s": 0.1562139687111111,
+      "dp_hidden_s": 0.13329456250000002,
+      "scaling_efficiency": 1.2662862945893518
+     },
+     {
+      "gpus": 1024,
+      "dp": 64,
+      "tp": 2,
+      "pp": 8,
+      "mb": 1,
+      "microbatches": 16,
+      "ckpt": false,
+      "step_s": 2.2758713136022872,
+      "tokens_per_s": 1842944.2714672587,
+      "tokens_per_s_per_gpu": 1799.7502651047448,
+      "mfu": 0.40719447825286653,
+      "mem_gb": 23.872131616,
+      "bubble_frac": 0.30434782608695654,
+      "breakdown_s": {
+       "compute": 1.1790238307065286,
+       "pipeline bubble": 0.5158229259341063,
+       "tensor parallel comm": 0.50128123904,
+       "pipeline sends": 0.03453008604444444,
+       "data parallel comm (exposed)": 0.0429715574,
+       "optimizer": 0.002241674477208076
+      },
+      "dp_allreduce_s": 0.0884609824,
+      "dp_hidden_s": 0.045489425,
+      "scaling_efficiency": 0.8805103456210008
+     },
+     {
+      "gpus": 4096,
+      "dp": 1024,
+      "tp": 4,
+      "pp": 1,
+      "mb": 1,
+      "microbatches": 1,
+      "ckpt": true,
+      "step_s": 0.9028157094149486,
+      "tokens_per_s": 4645803.076153862,
+      "tokens_per_s_per_gpu": 1134.2292666391265,
+      "mfu": 0.25661998967471805,
+      "mem_gb": 23.0021842,
+      "bubble_frac": 0.0,
+      "breakdown_s": {
+       "compute": 0.44545781004924506,
+       "pipeline bubble": 0.0,
+       "tensor parallel comm": 0.26537803776,
+       "pipeline sends": 0.0,
+       "data parallel comm (exposed)": 0.18358446423111108,
+       "optimizer": 0.008395397374592382
+      },
+      "dp_allreduce_s": 0.5044421642311111,
+      "dp_hidden_s": 0.3208577,
+      "scaling_efficiency": 0.554910657853826
+     }
+    ],
+    "restricted": {
+     "dp": [
+      null,
+      null,
+      null,
+      null
+     ],
+     "tp+dp": [
+      {
+       "gpus": 8,
+       "dp": 1,
+       "tp": 8,
+       "pp": 1,
+       "mb": 2,
+       "microbatches": 512,
+       "ckpt": false,
+       "step_s": 487.9931795607666,
+       "tokens_per_s": 8595.005372360354,
+       "tokens_per_s_per_gpu": 1074.3756715450443,
+       "mfu": 0.24307808116749818,
+       "mem_gb": 27.463328768,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 170.93120473658163,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 317.03829577728004,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.0,
+        "optimizer": 0.023679046904877543
+       },
+       "dp_allreduce_s": 0.0,
+       "dp_hidden_s": 0.0
+      },
+      {
+       "gpus": 64,
+       "dp": 16,
+       "tp": 4,
+       "pp": 1,
+       "mb": 2,
+       "microbatches": 32,
+       "ckpt": true,
+       "step_s": 42.442980229579994,
+       "tokens_per_s": 98822.08971453996,
+       "tokens_per_s_per_gpu": 1544.095151789687,
+       "mfu": 0.34935236954622123,
+       "mem_gb": 26.901129728,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 25.693750953321594,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 16.73843441664,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.0,
+        "optimizer": 0.010794859618400056
+       },
+       "dp_allreduce_s": 0.4774444186311111,
+       "dp_hidden_s": 0.4774444186311111
+      },
+      {
+       "gpus": 1024,
+       "dp": 256,
+       "tp": 4,
+       "pp": 1,
+       "mb": 2,
+       "microbatches": 2,
+       "ckpt": true,
+       "step_s": 2.66052124310404,
+       "tokens_per_s": 1576497.090888284,
+       "tokens_per_s_per_gpu": 1539.5479403205898,
+       "mfu": 0.34832356047333757,
+       "mem_gb": 25.960083488,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 1.6058594345825996,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 1.04615215104,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.0,
+        "optimizer": 0.008509657481440365
+       },
+       "dp_allreduce_s": 0.49955655729777776,
+       "dp_hidden_s": 0.49955655729777776
+      },
+      {
+       "gpus": 4096,
+       "dp": 1024,
+       "tp": 4,
+       "pp": 1,
+       "mb": 1,
+       "microbatches": 1,
+       "ckpt": true,
+       "step_s": 0.9028157094149486,
+       "tokens_per_s": 4645803.076153862,
+       "tokens_per_s_per_gpu": 1134.2292666391265,
+       "mfu": 0.25661998967471805,
+       "mem_gb": 23.0021842,
+       "bubble_frac": 0.0,
+       "breakdown_s": {
+        "compute": 0.44545781004924506,
+        "pipeline bubble": 0.0,
+        "tensor parallel comm": 0.26537803776,
+        "pipeline sends": 0.0,
+        "data parallel comm (exposed)": 0.18358446423111108,
+        "optimizer": 0.008395397374592382
+       },
+       "dp_allreduce_s": 0.5044421642311111,
+       "dp_hidden_s": 0.3208577
+      }
+     ],
+     "pp+dp": [
+      null,
+      {
+       "gpus": 64,
+       "dp": 8,
+       "tp": 1,
+       "pp": 8,
+       "mb": 1,
+       "microbatches": 128,
+       "ckpt": true,
+       "step_s": 25.32038128175406,
+       "tokens_per_s": 165649.32231184162,
+       "tokens_per_s_per_gpu": 2588.2706611225253,
+       "mfu": 0.5855976475556461,
+       "mem_gb": 22.68499712,
+       "bubble_frac": 0.05185185185185185,
+       "breakdown_s": {
+        "compute": 23.63331110462644,
+        "pipeline bubble": 1.2924467010342584,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.3650878656,
+        "data parallel comm (exposed)": 0.022919406211111076,
+        "optimizer": 0.006616204282245195
+       },
+       "dp_allreduce_s": 0.1562139687111111,
+       "dp_hidden_s": 0.13329456250000002
+      },
+      {
+       "gpus": 1024,
+       "dp": 128,
+       "tp": 1,
+       "pp": 8,
+       "mb": 1,
+       "microbatches": 8,
+       "ckpt": true,
+       "step_s": 2.859456510496474,
+       "tokens_per_s": 1466818.6015781588,
+       "tokens_per_s_per_gpu": 1432.4400406036707,
+       "mfu": 0.32409033979399354,
+       "mem_gb": 21.74395088,
+       "bubble_frac": 0.4666666666666667,
+       "breakdown_s": {
+        "compute": 1.4770819440391525,
+        "pipeline bubble": 1.2924467010342584,
+        "tensor parallel comm": 0.0,
+        "pipeline sends": 0.0405653184,
+        "data parallel comm (exposed)": 0.045031544877777746,
+        "optimizer": 0.0043310021452855054
+       },
+       "dp_allreduce_s": 0.17832610737777776,
+       "dp_hidden_s": 0.13329456250000002
+      },
+      null
+     ]
+    }
+   }
+  },
+  "llama3-70b": {
+   "nvlink_ib": {
+    "best": [
+     null,
+     {
+      "gpus": 64,
+      "dp": 1,
+      "tp": 8,
+      "pp": 8,
+      "mb": 1,
+      "microbatches": 1024,
+      "ckpt": true,
+      "step_s": 249.9506203011228,
+      "tokens_per_s": 16780.530470166465,
+      "tokens_per_s_per_gpu": 262.195788596351,
+      "mfu": 0.5177421246311573,
+      "mem_gb": 26.679945472,
+      "bubble_frac": 0.006789524733268671,
+      "breakdown_s": {
+       "compute": 230.08086605362212,
+       "pipeline bubble": 1.5728184202884323,
+       "tensor parallel comm": 15.185543096888887,
+       "pipeline sends": 3.085387279288889,
+       "data parallel comm (exposed)": 0.0,
+       "optimizer": 0.026005451034482756
+      },
+      "dp_allreduce_s": 0.0,
+      "dp_hidden_s": 0.0,
+      "scaling_efficiency": 1.0
+     },
+     {
+      "gpus": 1024,
+      "dp": 16,
+      "tp": 4,
+      "pp": 16,
+      "mb": 1,
+      "microbatches": 64,
+      "ckpt": true,
+      "step_s": 16.97683048577609,
+      "tokens_per_s": 247060.48655631955,
+      "tokens_per_s_per_gpu": 241.2700064026558,
+      "mfu": 0.4764212514373788,
+      "mem_gb": 25.248648512,
+      "bubble_frac": 0.189873417721519,
+      "breakdown_s": {
+       "compute": 13.149404693774745,
+       "pipeline bubble": 3.0818917251034557,
+       "tensor parallel comm": 0.47024002133333337,
+       "pipeline sends": 0.23641667804444444,
+       "data parallel comm (exposed)": 0.03294965441666667,
+       "optimizer": 0.005927713103448275
+      },
+      "dp_allreduce_s": 0.18388361066666667,
+      "dp_hidden_s": 0.15093395625,
+      "scaling_efficiency": 0.9201902429260207
+     },
+     {
+      "gpus": 4096,
+      "dp": 64,
+      "tp": 8,
+      "pp": 8,
+      "mb": 1,
+      "microbatches": 16,
+      "ckpt": true,
+      "step_s": 5.608294107260952,
+      "tokens_per_s": 747875.1862477601,
+      "tokens_per_s_per_gpu": 182.58671539251955,
+      "mfu": 0.3605429151353773,
+      "mem_gb": 17.998532368,
+      "bubble_frac": 0.30434782608695654,
+      "breakdown_s": {
+       "compute": 3.5950135320878456,
+       "pipeline bubble": 1.5728184202884323,
+       "tensor parallel comm": 0.3387657528888889,
+       "pipeline sends": 0.06883017208888889,
+       "data parallel comm (exposed)": 0.02794240369999998,
+       "optimizer": 0.004923826206896552
+      },
+      "dp_allreduce_s": 0.1935502912,
+      "dp_hidden_s": 0.16560788750000002,
+      "scaling_efficiency": 0.6963754695297979
+     }
+    ],
+    "restricted": {
+     "dp": [
+      null,
+      null,
+      null,
+      null
+     ],
+     "tp+dp": [
+      null,
+      null,
+      null,
+      null
+     ],
+     "pp+dp": [
+      null,
+      null,
+      null,
+      null
+     ]
+    }
+   },
+   "pcie_ib": {
+    "best": [
+     null,
+     {
+      "gpus": 64,
+      "dp": 1,
+      "tp": 8,
+      "pp": 8,
+      "mb": 1,
+      "microbatches": 1024,
+      "ckpt": true,
+      "step_s": 434.268545799434,
+      "tokens_per_s": 9658.318661506584,
+      "tokens_per_s_per_gpu": 150.91122908604038,
+      "mfu": 0.29799525307399705,
+      "mem_gb": 26.679945472,
+      "bubble_frac": 0.006789524733268671,
+      "breakdown_s": {
+       "compute": 230.08086605362212,
+       "pipeline bubble": 1.5728184202884323,
+       "tensor parallel comm": 199.50346859520002,
+       "pipeline sends": 3.085387279288889,
+       "data parallel comm (exposed)": 0.0,
+       "optimizer": 0.026005451034482756
+      },
+      "dp_allreduce_s": 0.0,
+      "dp_hidden_s": 0.0,
+      "scaling_efficiency": 1.0
+     },
+     {
+      "gpus": 1024,
+      "dp": 16,
+      "tp": 4,
+      "pp": 16,
+      "mb": 1,
+      "microbatches": 64,
+      "ckpt": true,
+      "step_s": 22.96331077164276,
+      "tokens_per_s": 182652.4076475731,
+      "tokens_per_s_per_gpu": 178.3714918433331,
+      "mfu": 0.3522193687968399,
+      "mem_gb": 25.248648512,
+      "bubble_frac": 0.189873417721519,
+      "breakdown_s": {
+       "compute": 13.149404693774745,
+       "pipeline bubble": 3.0818917251034557,
+       "tensor parallel comm": 6.4567203072,
+       "pipeline sends": 0.23641667804444444,
+       "data parallel comm (exposed)": 0.03294965441666667,
+       "optimizer": 0.005927713103448275
+      },
+      "dp_allreduce_s": 0.18388361066666667,
+      "dp_hidden_s": 0.15093395625,
+      "scaling_efficiency": 1.1819630184155254
+     },
+     {
+      "gpus": 4096,
+      "dp": 64,
+      "tp": 4,
+      "pp": 16,
+      "mb": 1,
+      "microbatches": 16,
+      "ckpt": true,
+      "step_s": 9.04320390201515,
+      "tokens_per_s": 463807.30164287885,
+      "tokens_per_s_per_gpu": 113.23420450265597,
+      "mfu": 0.2235967173003631,
+      "mem_gb": 24.835247888,
+      "bubble_frac": 0.4838709677419355,
+      "breakdown_s": {
+       "compute": 3.287351173443686,
+       "pipeline bubble": 3.0818917251034557,
+       "tensor parallel comm": 2.5336497408,
+       "pipeline sends": 0.0927711015111111,
+       "data parallel comm (exposed)": 0.04261633495,
+       "optimizer": 0.004923826206896552
+      },
+      "dp_allreduce_s": 0.1935502912,
+      "dp_hidden_s": 0.15093395625,
+      "scaling_efficiency": 0.750336507020937
+     }
+    ],
+    "restricted": {
+     "dp": [
+      null,
+      null,
+      null,
+      null
+     ],
+     "tp+dp": [
+      null,
+      null,
+      null,
+      null
+     ],
+     "pp+dp": [
+      null,
+      null,
+      null,
+      null
+     ]
+    }
+   }
+  }
+ }
+}

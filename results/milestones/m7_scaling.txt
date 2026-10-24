@@ -1,0 +1,103 @@
+PREDICTION: compute from the validated roofline model on this GPU's calibration (sm_120, final); links from links.json, not measured.
+
+small (0.13B params, seq 1024, global batch 512 = 0.5M tokens), nvlink_ib
+      8 GPUs: dp8 tp1 pp1 mb16           step     329.6 ms     1,590,621 tok/s  MFU  67.3%  mem  12.0 GB  biggest overhead: optimizer 0.9 ms
+         MFU with dp only: 67.3% (dp8 tp1 pp1 mb16)  tp+dp only: 67.3% (dp8 tp1 pp1 mb16)  pp+dp only: 67.3% (dp8 tp1 pp1 mb16)
+     64 GPUs: dp64 tp1 pp1 mb8           step      48.4 ms    10,828,770 tok/s  MFU  57.3%  mem   6.6 GB  biggest overhead: optimizer 0.6 ms
+         MFU with dp only: 57.3% (dp64 tp1 pp1 mb8)  tp+dp only: 57.3% (dp64 tp1 pp1 mb8)  pp+dp only: 57.3% (dp64 tp1 pp1 mb8)
+   1024 GPUs: dp512 tp2 pp1 mb1          step       9.2 ms    57,226,387 tok/s  MFU  18.9%  mem   1.0 GB  biggest overhead: data parallel comm (exposed) 0.9 ms
+         MFU with dp only: does not fit  tp+dp only: 18.9% (dp512 tp2 pp1 mb1)  pp+dp only: does not fit
+   4096 GPUs: none (no dp x tp x pp split both divides the batch and fits in memory)
+         MFU with dp only: does not fit  tp+dp only: does not fit  pp+dp only: does not fit
+
+small (0.13B params, seq 1024, global batch 512 = 0.5M tokens), pcie_ib
+      8 GPUs: dp8 tp1 pp1 mb16           step     329.6 ms     1,590,621 tok/s  MFU  67.3%  mem  12.0 GB  biggest overhead: optimizer 0.9 ms
+         MFU with dp only: 67.3% (dp8 tp1 pp1 mb16)  tp+dp only: 67.3% (dp8 tp1 pp1 mb16)  pp+dp only: 67.3% (dp8 tp1 pp1 mb16)
+     64 GPUs: dp64 tp1 pp1 mb8           step      61.9 ms     8,472,744 tok/s  MFU  44.8%  mem   6.6 GB  biggest overhead: data parallel comm (exposed) 13.5 ms
+         MFU with dp only: 44.8% (dp64 tp1 pp1 mb8)  tp+dp only: 44.8% (dp64 tp1 pp1 mb8)  pp+dp only: 44.8% (dp64 tp1 pp1 mb8)
+   1024 GPUs: dp128 tp2 pp4 mb1          step      24.3 ms    21,616,958 tok/s  MFU   7.1%  mem   0.5 GB  biggest overhead: tensor parallel comm 7.0 ms
+         MFU with dp only: does not fit  tp+dp only: 7.0% (dp256 tp4 pp1 mb2)  pp+dp only: does not fit
+   4096 GPUs: none (no dp x tp x pp split both divides the batch and fits in memory)
+         MFU with dp only: does not fit  tp+dp only: does not fit  pp+dp only: does not fit
+
+medium (0.37B params, seq 1024, global batch 512 = 0.5M tokens), nvlink_ib
+      8 GPUs: dp8 tp1 pp1 mb8            step    1118.3 ms       468,823 tok/s  MFU  60.5%  mem  18.2 GB  biggest overhead: optimizer 2.5 ms
+         MFU with dp only: 60.5% (dp8 tp1 pp1 mb8)  tp+dp only: 60.5% (dp8 tp1 pp1 mb8)  pp+dp only: 60.5% (dp8 tp1 pp1 mb8)
+     64 GPUs: dp64 tp1 pp1 mb8           step     141.2 ms     3,714,395 tok/s  MFU  59.9%  mem  17.9 GB  biggest overhead: optimizer 1.7 ms
+         MFU with dp only: 59.9% (dp64 tp1 pp1 mb8)  tp+dp only: 59.9% (dp64 tp1 pp1 mb8)  pp+dp only: 59.9% (dp64 tp1 pp1 mb8)
+   1024 GPUs: dp512 tp2 pp1 mb1          step      22.8 ms    22,967,041 tok/s  MFU  23.2%  mem   2.8 GB  biggest overhead: tensor parallel comm 1.1 ms
+         MFU with dp only: does not fit  tp+dp only: 23.2% (dp512 tp2 pp1 mb1)  pp+dp only: does not fit
+   4096 GPUs: dp512 tp8 pp1 mb1          step      22.8 ms    22,967,747 tok/s  MFU   5.8%  mem   0.7 GB  biggest overhead: tensor parallel comm 5.0 ms
+         MFU with dp only: does not fit  tp+dp only: 5.8% (dp512 tp8 pp1 mb1)  pp+dp only: does not fit
+
+medium (0.37B params, seq 1024, global batch 512 = 0.5M tokens), pcie_ib
+      8 GPUs: dp8 tp1 pp1 mb8            step    1133.4 ms       462,563 tok/s  MFU  59.7%  mem  18.2 GB  biggest overhead: data parallel comm (exposed) 15.1 ms
+         MFU with dp only: 59.7% (dp8 tp1 pp1 mb8)  tp+dp only: 59.7% (dp8 tp1 pp1 mb8)  pp+dp only: 59.7% (dp8 tp1 pp1 mb8)
+     64 GPUs: dp64 tp1 pp1 mb8           step     163.6 ms     3,204,248 tok/s  MFU  51.7%  mem  17.9 GB  biggest overhead: data parallel comm (exposed) 22.5 ms
+         MFU with dp only: 51.7% (dp64 tp1 pp1 mb8)  tp+dp only: 51.7% (dp64 tp1 pp1 mb8)  pp+dp only: 51.7% (dp64 tp1 pp1 mb8)
+   1024 GPUs: dp128 tp2 pp4 mb1          step      61.7 ms     8,492,110 tok/s  MFU   8.6%  mem   1.4 GB  biggest overhead: tensor parallel comm 17.5 ms
+         MFU with dp only: does not fit  tp+dp only: 8.4% (dp256 tp4 pp1 mb2)  pp+dp only: does not fit
+   4096 GPUs: dp512 tp8 pp1 mb1          step      45.3 ms    11,561,096 tok/s  MFU   2.9%  mem   0.7 GB  biggest overhead: tensor parallel comm 27.5 ms
+         MFU with dp only: does not fit  tp+dp only: 2.9% (dp512 tp8 pp1 mb1)  pp+dp only: does not fit
+
+large (0.94B params, seq 1024, global batch 512 = 0.5M tokens), nvlink_ib
+      8 GPUs: dp4 tp1 pp2 mb8            step    2282.2 ms       229,727 tok/s  MFU  71.4%  mem  24.4 GB  biggest overhead: pipeline bubble 133.8 ms
+         MFU with dp only: 68.8% (dp8 tp1 pp1 mb4)  tp+dp only: 69.0% (dp4 tp2 pp1 mb16)  pp+dp only: 71.4% (dp4 tp1 pp2 mb8)
+     64 GPUs: dp64 tp1 pp1 mb8           step     271.8 ms     1,928,843 tok/s  MFU  74.9%  mem  28.3 GB  biggest overhead: optimizer 4.2 ms
+         MFU with dp only: 74.9% (dp64 tp1 pp1 mb8)  tp+dp only: 74.9% (dp64 tp1 pp1 mb8)  pp+dp only: 74.9% (dp64 tp1 pp1 mb8)
+   1024 GPUs: dp512 tp2 pp1 mb1          step      44.7 ms    11,735,481 tok/s  MFU  28.5%  mem   5.9 GB  biggest overhead: data parallel comm (exposed) 13.0 ms
+         MFU with dp only: does not fit  tp+dp only: 28.5% (dp512 tp2 pp1 mb1)  pp+dp only: does not fit
+   4096 GPUs: dp512 tp8 pp1 mb1          step      35.0 ms    14,961,502 tok/s  MFU   9.1%  mem   1.5 GB  biggest overhead: data parallel comm (exposed) 17.0 ms
+         MFU with dp only: does not fit  tp+dp only: 9.1% (dp512 tp8 pp1 mb1)  pp+dp only: does not fit
+
+large (0.94B params, seq 1024, global batch 512 = 0.5M tokens), pcie_ib
+      8 GPUs: dp4 tp1 pp2 mb8            step    2354.0 ms       222,723 tok/s  MFU  69.2%  mem  24.4 GB  biggest overhead: pipeline bubble 133.8 ms
+         MFU with dp only: 64.2% (dp8 tp1 pp1 mb4)  tp+dp only: 64.2% (dp8 tp1 pp1 mb4)  pp+dp only: 69.2% (dp4 tp1 pp2 mb8)
+     64 GPUs: dp64 tp1 pp1 mb8           step     385.9 ms     1,358,479 tok/s  MFU  52.7%  mem  28.3 GB  biggest overhead: data parallel comm (exposed) 114.1 ms
+         MFU with dp only: 52.7% (dp64 tp1 pp1 mb8)  tp+dp only: 52.7% (dp64 tp1 pp1 mb8)  pp+dp only: 52.7% (dp64 tp1 pp1 mb8)
+   1024 GPUs: dp64 tp2 pp8 mb1           step      88.0 ms     5,954,546 tok/s  MFU  14.4%  mem   1.8 GB  biggest overhead: pipeline bubble 25.0 ms
+         MFU with dp only: does not fit  tp+dp only: 11.3% (dp256 tp4 pp1 mb2)  pp+dp only: does not fit
+   4096 GPUs: dp512 tp8 pp1 mb1          step      58.8 ms     8,916,454 tok/s  MFU   5.4%  mem   1.5 GB  biggest overhead: tensor parallel comm 27.8 ms
+         MFU with dp only: does not fit  tp+dp only: 5.4% (dp512 tp8 pp1 mb1)  pp+dp only: does not fit
+
+llama3-8b (8.03B params, seq 4096, global batch 1024 = 4.2M tokens), nvlink_ib
+      8 GPUs: dp1 tp4 pp2 mb1            step  175699.6 ms        23,872 tok/s  MFU  67.5%  mem  27.5 GB  biggest overhead: tensor parallel comm 10352.3 ms
+         MFU with dp only: does not fit  tp+dp only: 60.8% (dp1 tp8 pp1 mb2)  pp+dp only: does not fit
+     64 GPUs: dp4 tp2 pp8 mb1            step   20218.5 ms       207,449 tok/s  MFU  73.3%  mem  24.8 GB  biggest overhead: pipeline bubble 515.8 ms
+         MFU with dp only: does not fit  tp+dp only: 60.8% (dp8 tp8 pp1 mb2)  pp+dp only: 59.4% (dp8 tp1 pp8 mb1 ckpt)
+   1024 GPUs: dp128 tp8 pp1 mb2          step    1528.3 ms     2,744,494 tok/s  MFU  60.6%  mem  19.5 GB  biggest overhead: tensor parallel comm 188.5 ms
+         MFU with dp only: does not fit  tp+dp only: 60.6% (dp128 tp8 pp1 mb2)  pp+dp only: 32.8% (dp128 tp1 pp8 mb1 ckpt)
+   4096 GPUs: dp512 tp8 pp1 mb2          step     385.2 ms    10,888,657 tok/s  MFU  60.1%  mem  19.4 GB  biggest overhead: tensor parallel comm 47.1 ms
+         MFU with dp only: does not fit  tp+dp only: 60.1% (dp512 tp8 pp1 mb2)  pp+dp only: does not fit
+
+llama3-8b (8.03B params, seq 4096, global batch 1024 = 4.2M tokens), pcie_ib
+      8 GPUs: dp1 tp2 pp4 mb1 ckpt       step  256502.8 ms        16,352 tok/s  MFU  46.2%  mem  23.9 GB  biggest overhead: tensor parallel comm 44766.6 ms
+         MFU with dp only: does not fit  tp+dp only: 24.3% (dp1 tp8 pp1 mb2)  pp+dp only: does not fit
+     64 GPUs: dp8 tp1 pp8 mb1 ckpt       step   25320.4 ms       165,649 tok/s  MFU  58.6%  mem  22.7 GB  biggest overhead: pipeline bubble 1292.4 ms
+         MFU with dp only: does not fit  tp+dp only: 34.9% (dp16 tp4 pp1 mb2 ckpt)  pp+dp only: 58.6% (dp8 tp1 pp8 mb1 ckpt)
+   1024 GPUs: dp64 tp2 pp8 mb1           step    2275.9 ms     1,842,944 tok/s  MFU  40.7%  mem  23.9 GB  biggest overhead: pipeline bubble 515.8 ms
+         MFU with dp only: does not fit  tp+dp only: 34.8% (dp256 tp4 pp1 mb2 ckpt)  pp+dp only: 32.4% (dp128 tp1 pp8 mb1 ckpt)
+   4096 GPUs: dp1024 tp4 pp1 mb1 ckpt    step     902.8 ms     4,645,803 tok/s  MFU  25.7%  mem  23.0 GB  biggest overhead: tensor parallel comm 265.4 ms
+         MFU with dp only: does not fit  tp+dp only: 25.7% (dp1024 tp4 pp1 mb1 ckpt)  pp+dp only: does not fit
+
+llama3-70b (70.55B params, seq 4096, global batch 1024 = 4.2M tokens), nvlink_ib
+      8 GPUs: none (weights and gradients do not fit even with the widest tp x pp split)
+         MFU with dp only: does not fit  tp+dp only: does not fit  pp+dp only: does not fit
+     64 GPUs: dp1 tp8 pp8 mb1 ckpt       step  249950.6 ms        16,781 tok/s  MFU  51.8%  mem  26.7 GB  biggest overhead: tensor parallel comm 15185.5 ms
+         MFU with dp only: does not fit  tp+dp only: does not fit  pp+dp only: does not fit
+   1024 GPUs: dp16 tp4 pp16 mb1 ckpt     step   16976.8 ms       247,060 tok/s  MFU  47.6%  mem  25.2 GB  biggest overhead: pipeline bubble 3081.9 ms
+         MFU with dp only: does not fit  tp+dp only: does not fit  pp+dp only: does not fit
+   4096 GPUs: dp64 tp8 pp8 mb1 ckpt      step    5608.3 ms       747,875 tok/s  MFU  36.1%  mem  18.0 GB  biggest overhead: pipeline bubble 1572.8 ms
+         MFU with dp only: does not fit  tp+dp only: does not fit  pp+dp only: does not fit
+
+llama3-70b (70.55B params, seq 4096, global batch 1024 = 4.2M tokens), pcie_ib
+      8 GPUs: none (weights and gradients do not fit even with the widest tp x pp split)
+         MFU with dp only: does not fit  tp+dp only: does not fit  pp+dp only: does not fit
+     64 GPUs: dp1 tp8 pp8 mb1 ckpt       step  434268.5 ms         9,658 tok/s  MFU  29.8%  mem  26.7 GB  biggest overhead: tensor parallel comm 199503.5 ms
+         MFU with dp only: does not fit  tp+dp only: does not fit  pp+dp only: does not fit
+   1024 GPUs: dp16 tp4 pp16 mb1 ckpt     step   22963.3 ms       182,652 tok/s  MFU  35.2%  mem  25.2 GB  biggest overhead: tensor parallel comm 6456.7 ms
+         MFU with dp only: does not fit  tp+dp only: does not fit  pp+dp only: does not fit
+   4096 GPUs: dp64 tp4 pp16 mb1 ckpt     step    9043.2 ms       463,807 tok/s  MFU  22.4%  mem  24.8 GB  biggest overhead: pipeline bubble 3081.9 ms
+         MFU with dp only: does not fit  tp+dp only: does not fit  pp+dp only: does not fit
+
+Saved scaling_final.json, scaling_curves_final.png

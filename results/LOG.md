@@ -385,3 +385,57 @@ Fusion moves the step from bandwidth sensitive to compute sensitive. Doubling ba
 ### Llama 3 8B on one GPU (prediction only)
 
 Source: `milestones/m6_llama3_8b_single_gpu.txt`. Llama 3 8B shape (d 4096, 32 layers, 8 KV heads, ffn 14336, vocab 128256), batch 1, seq 4096, fused model, on this GPU's calibration: **1268 ms per step, 73% MFU**. Matmuls are 72% of the time, the optimizer 12%. This is a model of the compute only. It cannot actually run here: fp32 weights, gradients and Adam state for 8B parameters need about 128 GB. The scaling model in milestone 7 shards it.
+
+## Milestone 7: scaling model (PREDICTION)
+
+Code: `perf_model/scaling.py`, link constants in `perf_model/links.json`. Outputs: `scaling_final.json`, `scaling_curves_final.png`, `scaling_breakdown_llama3-8b_final.png`, `scaling_breakdown_llama3-70b_final.png`. Console output: `milestones/m7_scaling.txt`.
+
+**Everything in this section is a prediction.** The compute side comes from the milestone 6 performance model, which is validated on this GPU. The communication side is not measured: the only machine available has one GPU, so no NCCL all reduce could be timed. The link constants in `links.json` are effective bus bandwidths for NVLink 4 class links (360 GB/s per GPU), PCIe Gen5 without peer access (25 GB/s) and 400 Gb/s InfiniBand (45 GB/s per GPU), each with a stated source and meant to be replaced by `nccl-tests` numbers when a multi GPU machine is available.
+
+### What the model includes
+
+- **Compute per GPU:** the roofline model of the fused model with the block GEMMs, heads and MLP width split tp ways. Every sharded GEMM and attention shape was timed on this GPU first (1422 shapes in `shape_calibration_final.json`), so no prediction relies on an assumed GEMM efficiency. The first run used the 89% large GEMM efficiency for untimed shapes and came out 5 to 20% optimistic for small and sharded shapes. That is why every shape is timed now.
+- **Tensor parallel (Megatron style):** 2 all reduces of the (microbatch, seq, d) bf16 activation per layer in the forward and 2 in the backward, inside the node, not overlapped.
+- **Pipeline parallel (1F1B):** bubble fraction (p - 1) / (m + p - 1), plus one activation send per microbatch per direction between neighbouring stages. It needs at least p microbatches.
+- **Data parallel:** one fp32 gradient all reduce per step, hierarchical (ring inside the node, ring across nodes for each GPU's share). It overlaps with the backward pass of the last microbatch; the rest is exposed.
+- **Ring all reduce:** 2 (n - 1) / n x bytes / bandwidth + 2 (n - 1) x latency.
+- **Optimizer:** fused Adam with a distributed optimizer (ZeRO 1), so each GPU updates 1 / dp of its shard.
+- **Memory:** fp32 weights and gradients, a bf16 copy, Adam state / dp, and activations for the microbatches 1F1B keeps in flight. Activation sizes use the milestone 5 measurement (70 bytes per token per layer per unit of d, 19.5 with checkpointing). A layout must fit in 90% of a 32 GB GPU.
+- **Search:** for each model and GPU count it tries every tp in {1, 2, 4, 8}, every pp that divides the layers, microbatch 1 to 16, and checkpointing on or off, and keeps the fastest layout that divides the batch and fits. It also reports the best layout using only dp, only tp + dp, and only pp + dp.
+
+Workloads: the repo's `small`, `medium` and `large` at seq 1024 with a global batch of 512 sequences (0.5M tokens per step), and the Llama 3 8B and 70B shapes at seq 4096 with 1024 sequences (4.2M tokens per step). The batch is held fixed as GPUs are added (strong scaling).
+
+### Results: best layout, NVLink inside nodes, InfiniBand between
+
+| Model | 8 GPUs | 64 GPUs | 1024 GPUs | 4096 GPUs |
+|---|---|---|---|---|
+| small | 67.3% (dp8) | 57.3% (dp64) | 18.9% (dp512 tp2) | none: 512 sequences cannot fill 4096 GPUs |
+| medium | 60.5% (dp8) | 59.9% (dp64) | 23.2% (dp512 tp2) | 5.8% (dp512 tp8) |
+| large | 71.4% (dp4 pp2) | 74.9% (dp64) | 28.5% (dp512 tp2) | 9.1% (dp512 tp8) |
+| Llama 3 8B | 67.5% (dp1 tp4 pp2) | 73.3% (dp4 tp2 pp8) | 60.6% (dp128 tp8) | 60.1% (dp512 tp8) |
+| Llama 3 70B | does not fit | 51.8% (tp8 pp8, ckpt) | 47.6% (dp16 tp4 pp16, ckpt) | 36.1% (dp64 tp8 pp8, ckpt) |
+
+Values are MFU. Tokens per second for each point are in `scaling_final.json` and the left panel of `scaling_curves_final.png`. Llama 3 8B reaches 10.9M tokens/s on 4096 GPUs.
+
+### Same, with PCIe inside nodes (cards without NVLink)
+
+| Model | 8 GPUs | 64 GPUs | 1024 GPUs | 4096 GPUs |
+|---|---|---|---|---|
+| medium | 59.7% | 51.7% | 8.6% | 2.9% |
+| large | 69.2% | 52.7% | 14.4% | 5.4% |
+| Llama 3 8B | 46.2% | 58.6% | 40.7% | 25.7% |
+| Llama 3 70B | does not fit | 29.8% | 35.2% | 22.4% |
+
+### What the predictions say
+
+1. **For models that fit on one GPU, plain data parallel is the best layout, or within 3 points of it, up to 64 GPUs** (57 to 75% MFU on NVLink). The gradient all reduce hides under the backward pass. The one exception is `large` on 8 GPUs, where 2 pipeline stages beat pure dp (71.4% against 68.8%), because they halve the weights each GPU holds and leave room for bigger microbatches.
+2. **Strong scaling runs out of work.** With 0.5M tokens per step, 1024 GPUs leave 512 tokens per GPU. The microbatch drops to one sequence, tensor parallel has to be added just to use the GPUs, and MFU falls to 19 to 29%. At 4096 GPUs it falls to 6 to 9%. Bigger models and bigger batches, like Llama 3 at 4.2M tokens, keep 60% MFU at 4096 GPUs.
+3. **Llama 3 70B needs all three kinds of parallelism and checkpointing** to fit 32 GB GPUs: at least tp8 x pp8. At 4096 GPUs, 64 data parallel replicas leave only 16 microbatches per step for 8 pipeline stages, and the **pipeline bubble takes 28% of the step** (`scaling_breakdown_llama3-70b_final.png`). That is the largest single loss in any large configuration. An interleaved pipeline schedule or a larger global batch would address it; neither is modeled.
+4. **The intra node link decides how much tensor parallelism costs.** On PCIe, tensor parallel communication is the largest overhead in most large configs, and the best Llama 3 8B MFU at 4096 GPUs drops from 60% to 26%. The search moves to pipeline parallelism on PCIe where it can.
+5. **Combining is worth it for large models.** Llama 3 8B at 1024 GPUs on PCIe: tp + dp only gives 34.8% MFU, pp + dp only 32.4%, and the best combined layout (dp64 tp2 pp8) 40.7%. On NVLink at 1024 GPUs, tp + dp alone is already the best (60.6%), because tensor parallel communication is cheap there.
+
+### Limits of this model
+
+- Communication constants are not measured (see above).
+- The compute side is calibrated on one sm_120 GPU with 32 GB, so this is a prediction for a cluster of these GPUs, not of data center GPUs.
+- Not modeled: interleaved or zero bubble pipeline schedules, sequence parallelism, overlap of tensor parallel communication with compute, stragglers, network congestion, the extra lm head and embedding work on the first and last pipeline stages, and context parallelism for long sequences.
