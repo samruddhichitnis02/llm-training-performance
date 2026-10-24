@@ -1,0 +1,36 @@
+sm_120 (final) | medium batch 4 seq 1024 | bf16 sdpa fusedadam kernels=cuda
+clean step time (no profiler): 81.06 ms
+
+Top 15 GPU kernels (3 profiled steps)
+kernel                                                                               bucket                   calls/step    ms/step  % GPU
+-----------------------------------------------------------------------------------  ---------------------  ------------  ---------  -------
+void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x256_32x4_...  matmul                          120     20.291  26.2%
+void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x128_32x3...  matmul                           74     12.578  16.3%
+void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x256_32x4_...  matmul                           72     10.386  13.4%
+void at::native::(anonymous namespace)::multi_tensor_apply_kernel<at::native::(a...  optimizer                        18      7.337  9.5%
+void pytorch_flash::flash_bwd_dq_dk_dv_loop_seqk_parallel_kernel<Flash_bwd_kerne...  attention                        24      3.866  5.0%
+void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x128_32x3...  matmul                           24      3.771  4.9%
+void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x256_32x4_...  matmul                           24      3.444  4.5%
+void pytorch_flash::flash_fwd_kernel<Flash_fwd_kernel_traits<64, 128, 128, 4, fa...  attention                        24      1.684  2.2%
+void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x64_32x4_...  matmul                            2      1.547  2.0%
+void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_128x128_32x5...  matmul                           24      1.319  1.7%
+_swiglu_bwd_kernel                                                                   elementwise and other            24      1.265  1.6%
+void cutlass::Kernel2<cutlass_80_tensorop_s16816gemm_bf16_256x128_32x3_nt_align8...  matmul                            2      1.261  1.6%
+void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_128x128_32x5...  matmul                           24      1.237  1.6%
+void at::native::vectorized_elementwise_kernel<4, at::native::bfloat16_copy_kern...  memory copies                   146      1.165  1.5%
+void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda...  memory copies                   120      0.703  0.9%
+
+Bucket breakdown
+bucket                   launches/step    ms/step  % GPU
+---------------------  ---------------  ---------  -------
+matmul                             390     55.939  72.3%
+attention                           96      5.851  7.6%
+optimizer                           20      7.34   9.5%
+memory copies                      326      2.388  3.1%
+elementwise and other              345      5.86   7.6%
+
+GPU kernel launches per step: 1177
+GPU busy per step: 77.38 ms of 81.06 ms clean step time
+GPU idle: 4.5%
+
+Saved results/profile_final_sm_120_medium_b4_s1024_bf16_sdpa_fusedadam_cuda.json and profiles/profile_final_sm_120_medium_b4_s1024_bf16_sdpa_fusedadam_cuda.json

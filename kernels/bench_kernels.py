@@ -17,9 +17,10 @@ from pathlib import Path
 
 import torch
 import torch.nn.functional as F
+from triton.testing import do_bench
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from bench_train import RESULTS, SIZES, _time_gpu, apply_rope, env_info, rope_tables  # noqa: E402
+from bench_train import RESULTS, SIZES, apply_rope, env_info, rope_tables  # noqa: E402
 from kernels import triton_ops as T  # noqa: E402
 
 DEV = "cuda"
@@ -151,7 +152,9 @@ def main():
         for impl, fn in fns.items():
             try:
                 step = make_step(fn, inputs, grad_idx)
-                sec = _time_gpu(step, warmup=5, iters=20, repeats=3)
+                # do_bench clears L2 before every timed call and returns the median, so results
+                # reflect DRAM traffic, as in a real step where other layers evict these tensors.
+                sec = do_bench(step, warmup=50, rep=300, return_mode="median") / 1e3
                 r = {"ms": round(sec * 1e3, 4), "peak_mem_gb": round(peak_mem_gb(step), 3)}
                 if nbytes:
                     r["gbs"] = round(nbytes / sec / 1e9, 1)

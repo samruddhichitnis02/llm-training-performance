@@ -1,0 +1,21 @@
+sm_120 (final) | small: N=8192 tokens, d=768, ffn=2048, H=12, V=32000 | calibrated bandwidth 1441.3 GB/s
+op (fwd+bwd)                   impl                ms  achieved (of peak)      vs eager    vs compile    extra mem GB
+-----------------------------  -------------  -------  --------------------  ----------  ------------  --------------
+rmsnorm (x fp32 -> bf16)       eager           0.3275  307.4 GB/s (21.3%)          1             0.55           0.138
+rmsnorm (x fp32 -> bf16)       torch.compile   0.1793  561.4 GB/s (39.0%)          1.83          1              0.014
+rmsnorm (x fp32 -> bf16)       triton          0.0724  1390.7 GB/s (96.5%)         4.52          2.48           0.015
+add_rmsnorm (a bf16 + r fp32)  eager           0.3826  460.4 GB/s (31.9%)          1             0.46           0.151
+add_rmsnorm (a bf16 + r fp32)  torch.compile   0.1746  1009.0 GB/s (70.0%)         2.19          1              0.039
+add_rmsnorm (a bf16 + r fp32)  triton          0.1225  1438.1 GB/s (99.8%)         3.12          1.43           0.04
+add_rmsnorm (a bf16 + r fp32)  cuda            0.1224  1439.0 GB/s (99.8%)         3.13          1.43           0.04
+swiglu                         eager           0.2414  1112.0 GB/s (77.1%)         1             0.73           0.067
+swiglu                         torch.compile   0.1758  1526.6 GB/s (105.9%)        1.37          1              0.034
+swiglu                         triton          0.1759  1526.3 GB/s (105.9%)        1.37          1              0.034
+rope_qkv                       eager           0.5703  264.8 GB/s (18.4%)          1             0.43           0.088
+rope_qkv                       torch.compile   0.2478  609.3 GB/s (42.3%)          2.3           1              0.088
+rope_qkv                       triton          0.1086  1390.3 GB/s (96.5%)         5.25          2.28           0.038
+linear + cross entropy         eager          12.8523  94.0 TFLOPs (41.3%)         1             0.56           3.084
+linear + cross entropy         torch.compile   7.2016  167.7 TFLOPs (73.7%)        1.78          1              0.524
+linear + cross entropy         triton          6.8859  175.4 TFLOPs (77.1%)        1.87          1.05           0.311
+
+Saved results/bench_kernels_final_sm_120_small_b8_s1024.json

@@ -8,7 +8,7 @@
   "gpu_count": 1,
   "sm_count": 170,
   "gpu_mem_gb": 34.2,
-  "time": "2026-10-23 17:39:10",
+  "time": "2026-10-23 17:52:00",
   "size": "small",
   "batch": 8,
   "seq": 1024,
@@ -22,28 +22,28 @@
       "flops": null,
       "results": {
         "eager": {
-          "ms": 0.3625,
+          "ms": 0.3275,
           "peak_mem_gb": 0.138,
-          "gbs": 277.7,
-          "pct_peak_bw": 19.3,
+          "gbs": 307.4,
+          "pct_peak_bw": 21.3,
           "speedup_vs_eager": 1.0,
-          "speedup_vs_compile": 0.66
+          "speedup_vs_compile": 0.55
         },
         "torch.compile": {
-          "ms": 0.2378,
+          "ms": 0.1793,
           "peak_mem_gb": 0.014,
-          "gbs": 423.2,
-          "pct_peak_bw": 29.4,
-          "speedup_vs_eager": 1.52,
+          "gbs": 561.4,
+          "pct_peak_bw": 39.0,
+          "speedup_vs_eager": 1.83,
           "speedup_vs_compile": 1.0
         },
         "triton": {
-          "ms": 0.198,
+          "ms": 0.0724,
           "peak_mem_gb": 0.015,
-          "gbs": 508.4,
-          "pct_peak_bw": 35.3,
-          "speedup_vs_eager": 1.83,
-          "speedup_vs_compile": 1.2
+          "gbs": 1390.7,
+          "pct_peak_bw": 96.5,
+          "speedup_vs_eager": 4.52,
+          "speedup_vs_compile": 2.48
         }
       }
     },
@@ -53,28 +53,36 @@
       "flops": null,
       "results": {
         "eager": {
-          "ms": 0.4112,
+          "ms": 0.3826,
           "peak_mem_gb": 0.151,
-          "gbs": 428.4,
-          "pct_peak_bw": 29.7,
+          "gbs": 460.4,
+          "pct_peak_bw": 31.9,
           "speedup_vs_eager": 1.0,
-          "speedup_vs_compile": 0.43
+          "speedup_vs_compile": 0.46
         },
         "torch.compile": {
-          "ms": 0.1768,
+          "ms": 0.1746,
           "peak_mem_gb": 0.039,
-          "gbs": 996.4,
-          "pct_peak_bw": 69.1,
-          "speedup_vs_eager": 2.33,
+          "gbs": 1009.0,
+          "pct_peak_bw": 70.0,
+          "speedup_vs_eager": 2.19,
           "speedup_vs_compile": 1.0
         },
         "triton": {
-          "ms": 0.2068,
+          "ms": 0.1225,
           "peak_mem_gb": 0.04,
-          "gbs": 851.9,
-          "pct_peak_bw": 59.1,
-          "speedup_vs_eager": 1.99,
-          "speedup_vs_compile": 0.85
+          "gbs": 1438.1,
+          "pct_peak_bw": 99.8,
+          "speedup_vs_eager": 3.12,
+          "speedup_vs_compile": 1.43
+        },
+        "cuda": {
+          "ms": 0.1224,
+          "peak_mem_gb": 0.04,
+          "gbs": 1439.0,
+          "pct_peak_bw": 99.8,
+          "speedup_vs_eager": 3.13,
+          "speedup_vs_compile": 1.43
         }
       }
     },
@@ -84,28 +92,28 @@
       "flops": null,
       "results": {
         "eager": {
-          "ms": 0.2112,
+          "ms": 0.2414,
           "peak_mem_gb": 0.067,
-          "gbs": 1270.8,
-          "pct_peak_bw": 88.2,
+          "gbs": 1112.0,
+          "pct_peak_bw": 77.1,
           "speedup_vs_eager": 1.0,
-          "speedup_vs_compile": 1.0
+          "speedup_vs_compile": 0.73
         },
         "torch.compile": {
-          "ms": 0.2116,
+          "ms": 0.1758,
           "peak_mem_gb": 0.034,
-          "gbs": 1268.4,
-          "pct_peak_bw": 88.0,
-          "speedup_vs_eager": 1.0,
+          "gbs": 1526.6,
+          "pct_peak_bw": 105.9,
+          "speedup_vs_eager": 1.37,
           "speedup_vs_compile": 1.0
         },
         "triton": {
-          "ms": 0.1818,
+          "ms": 0.1759,
           "peak_mem_gb": 0.034,
-          "gbs": 1476.5,
-          "pct_peak_bw": 102.4,
-          "speedup_vs_eager": 1.16,
-          "speedup_vs_compile": 1.16
+          "gbs": 1526.3,
+          "pct_peak_bw": 105.9,
+          "speedup_vs_eager": 1.37,
+          "speedup_vs_compile": 1.0
         }
       }
     },
@@ -115,28 +123,28 @@
       "flops": null,
       "results": {
         "eager": {
-          "ms": 0.6026,
+          "ms": 0.5703,
           "peak_mem_gb": 0.088,
-          "gbs": 250.6,
-          "pct_peak_bw": 17.4,
+          "gbs": 264.8,
+          "pct_peak_bw": 18.4,
           "speedup_vs_eager": 1.0,
-          "speedup_vs_compile": 0.65
+          "speedup_vs_compile": 0.43
         },
         "torch.compile": {
-          "ms": 0.3938,
+          "ms": 0.2478,
           "peak_mem_gb": 0.088,
-          "gbs": 383.4,
-          "pct_peak_bw": 26.6,
-          "speedup_vs_eager": 1.53,
+          "gbs": 609.3,
+          "pct_peak_bw": 42.3,
+          "speedup_vs_eager": 2.3,
           "speedup_vs_compile": 1.0
         },
         "triton": {
-          "ms": 0.1987,
+          "ms": 0.1086,
           "peak_mem_gb": 0.038,
-          "gbs": 759.8,
-          "pct_peak_bw": 52.7,
-          "speedup_vs_eager": 3.03,
-          "speedup_vs_compile": 1.98
+          "gbs": 1390.3,
+          "pct_peak_bw": 96.5,
+          "speedup_vs_eager": 5.25,
+          "speedup_vs_compile": 2.28
         }
       }
     },
@@ -146,28 +154,28 @@
       "flops": 1207959552000.0,
       "results": {
         "eager": {
-          "ms": 13.0998,
+          "ms": 12.8523,
           "peak_mem_gb": 3.084,
-          "tflops": 92.2,
-          "pct_peak_bf16": 40.5,
+          "tflops": 94.0,
+          "pct_peak_bf16": 41.3,
           "speedup_vs_eager": 1.0,
-          "speedup_vs_compile": 0.57
+          "speedup_vs_compile": 0.56
         },
         "torch.compile": {
-          "ms": 7.4151,
+          "ms": 7.2016,
           "peak_mem_gb": 0.524,
-          "tflops": 162.9,
-          "pct_peak_bf16": 71.6,
-          "speedup_vs_eager": 1.77,
+          "tflops": 167.7,
+          "pct_peak_bf16": 73.7,
+          "speedup_vs_eager": 1.78,
           "speedup_vs_compile": 1.0
         },
         "triton": {
-          "ms": 7.0037,
+          "ms": 6.8859,
           "peak_mem_gb": 0.311,
-          "tflops": 172.5,
-          "pct_peak_bf16": 75.8,
+          "tflops": 175.4,
+          "pct_peak_bf16": 77.1,
           "speedup_vs_eager": 1.87,
-          "speedup_vs_compile": 1.06
+          "speedup_vs_compile": 1.05
         }
       }
     }

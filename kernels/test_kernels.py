@@ -112,7 +112,7 @@ def all_checks():
         impls["cuda"] = cuda_impl
 
     # 8.1 RMSNorm and residual add plus RMSNorm
-    for D in (768, 2048):
+    for D in (768, 2048, 8192):   # 8192 exercises the CUDA kernel's 2 groups per thread path
         for dt in (torch.float32, torch.bfloat16):
             x = torch.randn(4096, D, device=DEV)
             w = 1 + 0.1 * torch.randn(D, device=DEV)

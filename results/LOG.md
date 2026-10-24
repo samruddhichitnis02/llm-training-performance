@@ -152,3 +152,76 @@ Source: `profile_final_sm_120_medium_b4_s1024_bf16_sdpa_fusedadam_triton.json`. 
 | clean step time | 103.7 ms | 81.4 ms |
 
 Launches per step dropped by 60%, and elementwise plus copy time dropped from 25 ms to 8.4 ms. Matmuls are now 72% of GPU time. The biggest remaining non matmul items are the optimizer (7.3 ms) and the fp32 to bf16 weight casts that autocast does every step (146 copy launches).
+
+## Milestone 4: CUDA C++ add plus RMSNorm
+
+Code: `kernels/cuda_ext/add_rmsnorm.cu` (forward and backward kernels), `kernels/cuda_ext/add_rmsnorm_ext.py` (built with `torch.utils.cpp_extension.load`, wrapped in an autograd Function with the same signature as the Triton version). Built with nvcc 12.8.93 for `sm_120` only. Console output of every run is in `milestones/m4_*.txt`.
+
+Design:
+- Forward: one block per row. Each thread loads 4 values at a time with one vectorized load (16 bytes for fp32, 8 for bf16) and keeps `s` in registers. The sum of squares is reduced with warp shuffles, then across warps through a 32 entry shared memory array.
+- Backward: a persistent grid of 4 x 170 SMs = 680 blocks, each looping over rows. Every thread owns the same columns in every row, so the weight gradient accumulates in registers and each block writes one row of a (680, D) buffer.
+- Templated on the dtype of `a`, `r` and `y` separately, so the bf16 sublayer output and the fp32 residual stream are read directly with no cast kernel.
+
+One bug found by the tests: with D = 8192 the first version used 1024 threads per block, and the backward failed with `cudaErrorLaunchOutOfResources` (1024 threads leave only 64 registers per thread). Blocks are now capped at 512 threads with `__launch_bounds__(512)`, and wider rows give each thread more groups of 4.
+
+### Correctness
+
+Source: `milestones/m4_test_kernels.txt`. **142 of 142 checks passed.** The CUDA kernel is tested on exactly the same cases as the Triton one (D = 768, 2048 and 8192; fp32, bf16, and mixed bf16 plus fp32). Its errors match the Triton kernel's to two digits (fp32 about 5e-8, bf16 about 2e-3).
+
+Training parity (`loss_parity_final_sm_120_small_torch_triton_cuda.json`): torch, Triton and CUDA models trained 20 steps from the same weights. Largest relative loss difference against torch: 1.4%. PASS.
+
+### Microbenchmarks, remeasured
+
+The milestone 3 microbenchmark timed back to back calls. For ops that take 0.1 to 0.4 ms, that mostly measured Python and autograd launch time, not the GPU, and repeated runs differed by up to 60% (Triton add_rmsnorm read 0.237 ms in one run and 0.373 ms in the next). When the CUDA kernel showed 120% of DRAM bandwidth, it was clear the inputs were also staying in the 96 MB L2 cache between calls.
+
+`bench_kernels.py` now uses `triton.testing.do_bench`. It clears L2 before every call, times each call on the GPU with CUDA events, and reports the median. This replaces the milestone 3 table; `bench_kernels_final_sm_120_small_b8_s1024.json` holds the new numbers, and the old console output stays in `milestones/m3_bench_kernels_small.txt`.
+
+Source: `bench_kernels_final_sm_120_small_b8_s1024.json` (`small`, 8192 tokens). BW = minimum bytes moved, against 1441 GB/s.
+
+| Op (fwd + bwd) | eager | torch.compile | Triton | CUDA C++ | Best vs eager | Best vs compile |
+|---|---|---|---|---|---|---|
+| rmsnorm (fp32 in, bf16 out) | 0.328 ms, 21% | 0.179 ms, 39% | 0.072 ms, 97% | | 4.52x | 2.48x |
+| add_rmsnorm (bf16 + fp32) | 0.383 ms, 32% | 0.175 ms, 70% | 0.123 ms, 100% | 0.122 ms, 100% | 3.13x | 1.43x |
+| swiglu | 0.241 ms, 77% | 0.176 ms, 106% | 0.176 ms, 106% | | 1.37x | 1.00x |
+| rope_qkv | 0.570 ms, 18% | 0.248 ms, 42% | 0.109 ms, 97% | | 5.25x | 2.28x |
+| linear + cross entropy | 12.85 ms, 94 TFLOPs | 7.20 ms, 168 TFLOPs | 6.89 ms, 175 TFLOPs | | 1.87x | 1.05x |
+
+What it shows:
+1. Measured on the GPU alone, the Triton norm and RoPE kernels run at 97 to 100% of the copy bandwidth. They cannot go faster without moving fewer bytes. The 40 to 50% in milestone 3 was CPU launch time.
+2. CUDA C++ and Triton add_rmsnorm are identical (0.1224 against 0.1225 ms). Both hit the bandwidth ceiling, so hand written CUDA has nothing left to win on this op.
+3. Swiglu shows 106%: inside one forward plus backward call, the backward rereads `a` and `b` while they are still in L2, so fewer bytes come from DRAM than the minimum count assumes. `torch.compile` generates a swiglu as good as the hand written one.
+
+### Ladder, all 7 rows
+
+Sources: `milestones/m4_sweep_final_sm_120_small_b8_s1024.json`, `milestones/m4_sweep_final_sm_120_medium_b4_s1024.json`. MFU reference: 226.8 TFLOPs bf16 measured in each run.
+
+| Row | small ms | tok/s | Speedup | MFU | GB | medium ms | tok/s | Speedup | MFU | GB |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1 fp32 baseline, naive attention | 223.02 | 36,732 | 1.00 | 12.5% | 15.94 | 320.64 | 12,774 | 1.00 | 13.2% | 21.16 |
+| 2 bf16 autocast | 155.91 | 52,542 | 1.43 | 17.8% | 16.06 | 226.01 | 18,123 | 1.42 | 18.8% | 21.62 |
+| 3 + fused attention (SDPA) | 73.44 | 111,544 | 3.04 | 37.9% | 9.10 | 117.21 | 34,947 | 2.74 | 36.2% | 12.36 |
+| 4 + fused Adam | 68.70 | 119,250 | 3.25 | 40.5% | 9.10 | 103.85 | 39,443 | 3.09 | 40.8% | 12.36 |
+| 5 + torch.compile | 48.20 | 169,951 | 4.63 | 57.7% | 5.49 | 80.10 | 51,133 | 4.00 | 52.9% | 9.74 |
+| 6 fused Triton kernels | 48.55 | 168,722 | 4.59 | 57.3% | 5.15 | 81.31 | 50,373 | 3.94 | 52.2% | 9.62 |
+| 7 CUDA C++ add+RMSNorm | 48.36 | 169,390 | 4.61 | 57.5% | 5.15 | 81.20 | 50,441 | 3.95 | 52.2% | 9.62 |
+
+Rows 6 and 7 are within 0.4% of each other, which is run to run noise. That matches the microbenchmark: both add_rmsnorm kernels sit at the bandwidth limit, and the op is about 1.6% of the step.
+
+### Profile with the CUDA kernel
+
+Source: `profile_final_sm_120_medium_b4_s1024_bf16_sdpa_fusedadam_cuda.json`. Bucket shares match the Triton profile to within 0.2 points (matmul 72.3%, elementwise and other 7.6%, 1177 launches per step, GPU idle 4.5%).
+
+Inside the real step, the 24 add_rmsnorm calls per step take 1.29 ms with CUDA (0.64 forward, 0.65 backward) and about 1.03 ms with Triton (from the Triton profile, after subtracting the 25 plain rmsnorm calls). So the Triton version is slightly faster in place, even though the two tie in isolation. The step time difference this makes (0.26 ms of 81 ms) is below the noise.
+
+### Nsight Systems
+
+Nsight Systems 2024.6.2 came with the CUDA 12.8 toolkit. Trace of `medium`, batch 4, seq 1024, fused Adam, Triton kernels, with the `--nvtx` ranges:
+
+```
+nsys profile -t cuda,nvtx -o profiles/nsys_medium_triton --force-overwrite true \
+  python bench_train.py --size medium --batch 4 --seq 1024 --fused-adam --kernels triton --nvtx --warmup 3 --steps 5
+```
+
+The `.nsys-rep` file is in `profiles/` (not committed). The summaries are committed as `milestones/m4_nsys_nvtx_sum.csv` and `milestones/m4_nsys_cuda_gpu_kern_sum.csv`.
+
+From the NVTX summary: each timed step range lasts about 31.5 ms on the CPU, while the step takes 81 ms on the GPU. The CPU finishes queueing all the work for a step in well under half the GPU time, so this config is GPU bound and launch overhead is hidden. The first warmup step takes 454 ms (Triton compiling and autotuning the kernels, and cuBLAS choosing its kernels), which is why warmup steps are excluded from timing.

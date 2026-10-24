@@ -1,0 +1,28 @@
+sm_120 (final) | small: 134M params, batch 8, seq 1024
+bf16 matmul peak reached this run (MFU reference): 226.8 TFLOPs
+running: 1 fp32 baseline, naive attn ...
+  223.02 ms/step, 36,732 tok/s, MFU 12.5%, 15.94 GB, loss 2.5698
+running: 2 bf16 autocast ...
+  155.91 ms/step, 52,542 tok/s, MFU 17.8%, 16.06 GB, loss 2.5617
+running: 3 + fused attention (SDPA) ...
+  73.44 ms/step, 111,544 tok/s, MFU 37.9%, 9.1 GB, loss 2.5585
+running: 4 + fused Adam ...
+  68.7 ms/step, 119,250 tok/s, MFU 40.5%, 9.1 GB, loss 2.5806
+running: 5 + torch.compile ...
+  48.2 ms/step, 169,951 tok/s, MFU 57.7%, 5.49 GB, loss 2.5551
+running: 6 fused Triton kernels ...
+  48.55 ms/step, 168,722 tok/s, MFU 57.3%, 5.15 GB, loss 2.5218
+running: 7 CUDA C++ add+RMSNorm ...
+  48.36 ms/step, 169,390 tok/s, MFU 57.5%, 5.15 GB, loss 2.5324
+
+row                            ms/step    tok/s    speedup    TFLOPs  MFU      peak GB    loss  finite
+---------------------------  ---------  -------  ---------  --------  -----  ---------  ------  --------
+1 fp32 baseline, naive attn     223.02   36,732       1        28.3   12.5%      15.94  2.5698  yes
+2 bf16 autocast                 155.91   52,542       1.43     40.48  17.8%      16.06  2.5617  yes
+3 + fused attention (SDPA)       73.44  111,544       3.04     85.94  37.9%       9.1   2.5585  yes
+4 + fused Adam                   68.7   119,250       3.25     91.87  40.5%       9.1   2.5806  yes
+5 + torch.compile                48.2   169,951       4.63    130.93  57.7%       5.49  2.5551  yes
+6 fused Triton kernels           48.55  168,722       4.59    129.99  57.3%       5.15  2.5218  yes
+7 CUDA C++ add+RMSNorm           48.36  169,390       4.61    130.5   57.5%       5.15  2.5324  yes
+
+Saved results/milestones/m4_sweep_final_sm_120_small_b8_s1024.json
