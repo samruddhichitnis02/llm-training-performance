@@ -6,8 +6,6 @@ numpy==2.5.4
 pandas==3.1.0
 matplotlib==3.11.2
 tabulate==0.10.0
-anthropic==2.3.0
-python-dotenv==1.2.4
 pytest==9.1.1
 # Optional, used by the CUDA C++ extension build:
 #   ninja==1.13.0
