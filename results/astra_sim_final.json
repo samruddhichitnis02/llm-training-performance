@@ -1,0 +1,145 @@
+{
+ "astra_sim_commit": "4ce9ecfe746a3ee5fe47559a11d91644d641fa7f",
+ "binary": "AstraSim_Analytical_Congestion_Unaware",
+ "arch": "sm_120",
+ "machine_label": "final",
+ "time": "2026-10-23 21:38:35",
+ "network": "NVLink switch inside 8 GPU nodes, InfiniBand switch between nodes (perf_model/links.json)",
+ "results": [
+  {
+   "workload": "medium_b2_s1024_dp2_tp2_pp2_m4",
+   "ranks": 8,
+   "export_compute_ms_rank0": 59.855,
+   "replay_compute_ms_rank0_after_rounding": 59.873,
+   "scaling_model_step_ms": 81.45750296574298,
+   "scaling_model_breakdown_ms": {
+    "compute": 60.62224930275773,
+    "pipeline bubble": 15.155562325689433,
+    "tensor parallel comm": 4.236202666666667,
+    "pipeline sends": 0.14650844444444444,
+    "data parallel comm (exposed)": 0.0,
+    "optimizer": 1.2969802261846943
+   },
+   "replay": {
+    "mode": "replay",
+    "ranks": 8,
+    "ranks_reported": 8,
+    "exit_code": -6,
+    "crashed_at_shutdown": true,
+    "step_ms": 87.275544,
+    "max_exposed_comm_ms": 27.402544,
+    "per_stage_ms": {
+     "0": 87.275544,
+     "1": 77.155348
+    },
+    "sim_wall_s": 2.0,
+    "vs_scaling_model_pct": 7.14
+   },
+   "roofline": {
+    "mode": "roofline",
+    "ranks": 8,
+    "ranks_reported": 7,
+    "exit_code": -6,
+    "crashed_at_shutdown": true,
+    "step_ms": 53.790923,
+    "max_exposed_comm_ms": 23.214317,
+    "per_stage_ms": {
+     "0": 53.790923,
+     "1": 48.436636
+    },
+    "sim_wall_s": 2.2,
+    "vs_scaling_model_pct": -33.96
+   }
+  },
+  {
+   "workload": "llama3-8b_b1_s4096_dp2_tp8_pp2_m4",
+   "ranks": 32,
+   "export_compute_ms_rank0": 375.502,
+   "replay_compute_ms_rank0_after_rounding": 375.529,
+   "scaling_model_step_ms": 558.5244048903205,
+   "scaling_model_breakdown_ms": {
+    "compute": 382.7341246196055,
+    "pipeline bubble": 95.68353115490137,
+    "tensor parallel comm": 65.63578311111111,
+    "pipeline sends": 7.506540444444445,
+    "data parallel comm (exposed)": 0.0,
+    "optimizer": 6.9644255602581
+   },
+   "replay": {
+    "mode": "replay",
+    "ranks": 32,
+    "ranks_reported": 30,
+    "exit_code": -6,
+    "crashed_at_shutdown": true,
+    "step_ms": 648.101884,
+    "max_exposed_comm_ms": 272.572884,
+    "per_stage_ms": {
+     "0": 648.101884,
+     "1": 574.574864
+    },
+    "sim_wall_s": 11.6,
+    "vs_scaling_model_pct": 16.04
+   },
+   "roofline": {
+    "mode": "roofline",
+    "ranks": 32,
+    "ranks_reported": 24,
+    "exit_code": -6,
+    "crashed_at_shutdown": true,
+    "step_ms": 568.348121,
+    "max_exposed_comm_ms": 276.476823,
+    "per_stage_ms": {
+     "0": 568.348121,
+     "1": 499.437906
+    },
+    "sim_wall_s": 12.5,
+    "vs_scaling_model_pct": 1.76
+   }
+  },
+  {
+   "workload": "tiny_b2_s256_dp2_tp2_pp2_m2",
+   "ranks": 8,
+   "export_compute_ms_rank0": 1.11,
+   "replay_compute_ms_rank0_after_rounding": 1.125,
+   "scaling_model_step_ms": 4.19496987036703,
+   "scaling_model_breakdown_ms": {
+    "compute": 2.405,
+    "pipeline bubble": 1.2025,
+    "tensor parallel comm": 0.35790506666666666,
+    "pipeline sends": 0.026738133333333334,
+    "data parallel comm (exposed)": 0.0,
+    "optimizer": 0.20282667036702975
+   },
+   "replay": {
+    "mode": "replay",
+    "ranks": 8,
+    "ranks_reported": 8,
+    "exit_code": 0,
+    "crashed_at_shutdown": false,
+    "step_ms": 4.774692,
+    "max_exposed_comm_ms": 3.649692,
+    "per_stage_ms": {
+     "0": 4.774692,
+     "1": 3.992904
+    },
+    "sim_wall_s": 0.4,
+    "vs_scaling_model_pct": 13.82
+   },
+   "roofline": {
+    "mode": "roofline",
+    "ranks": 8,
+    "ranks_reported": 8,
+    "exit_code": 0,
+    "crashed_at_shutdown": false,
+    "step_ms": 4.412434,
+    "max_exposed_comm_ms": 3.607334,
+    "per_stage_ms": {
+     "0": 4.412434,
+     "1": 3.669243
+    },
+    "sim_wall_s": 0.4,
+    "vs_scaling_model_pct": 5.18
+   }
+  }
+ ]
+}

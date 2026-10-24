@@ -1,0 +1,6 @@
+PyTorch execution trace: 9729 operator nodes (/tmp/pytorch_et_medium_b4_s1024.json)
+  GEMMs: trace 366, export 366; same multiset of (M, N, K): PASS
+  forward block GEMM order (first 120): PASS
+  flash attention calls: trace 24 forward and 24 backward, export 24 and 24: PASS
+  autograd and custom function nodes seen: autograd::engine::evaluate_function: UnsafeViewBackward0 x144, UnsafeViewBackward0 x144, autograd::engine::evaluate_function: ViewBackward0 x121, ViewBackward0 x121, autograd::engine::evaluate_function: MmBackward0 x120, MmBackward0 x120, autograd::engine::evaluate_function: TBackward0 x120, TBackward0 x120
+Saved workload_et_crosscheck_final_medium_b4_s1024.json

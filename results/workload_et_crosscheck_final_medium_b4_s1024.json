@@ -1,0 +1,52 @@
+{
+ "size": "medium",
+ "batch": 4,
+ "seq": 1024,
+ "trace_nodes": 9729,
+ "trace_gemms": 366,
+ "export_gemms": 366,
+ "gemm_multiset_match": true,
+ "forward_order_match": true,
+ "attention": {
+  "trace": [
+   24,
+   24
+  ],
+  "export": [
+   24,
+   24
+  ]
+ },
+ "autograd_nodes": {
+  "autograd::engine::evaluate_function: UnsafeViewBackward0": 144,
+  "UnsafeViewBackward0": 144,
+  "autograd::engine::evaluate_function: ViewBackward0": 121,
+  "ViewBackward0": 121,
+  "autograd::engine::evaluate_function: MmBackward0": 120,
+  "MmBackward0": 120,
+  "autograd::engine::evaluate_function: TBackward0": 120,
+  "TBackward0": 120,
+  "autograd::engine::evaluate_function: ToCopyBackward0": 120,
+  "ToCopyBackward0": 120,
+  "_RMSNorm": 25,
+  "autograd::engine::evaluate_function: _RMSNormBackward": 25,
+  "_RMSNormBackward": 25,
+  "_RopeQKV": 24,
+  "_AddRMSNorm": 24,
+  "_SwiGLU": 24,
+  "autograd::engine::evaluate_function: AddBackward0": 24,
+  "AddBackward0": 24,
+  "autograd::engine::evaluate_function: _SwiGLUBackward": 24,
+  "_SwiGLUBackward": 24,
+  "autograd::engine::evaluate_function: _AddRMSNormBackward": 24,
+  "_AddRMSNormBackward": 24,
+  "autograd::engine::evaluate_function: CloneBackward0": 24,
+  "CloneBackward0": 24,
+  "autograd::engine::evaluate_function: TransposeBackward0": 24,
+  "TransposeBackward0": 24,
+  "autograd::engine::evaluate_function: ScaledDotProductFlashAttentionBackward0": 24,
+  "ScaledDotProductFlashAttentionBackward0": 24,
+  "autograd::engine::evaluate_function: _RopeQKVBackward": 24,
+  "_RopeQKVBackward": 24
+ }
+}

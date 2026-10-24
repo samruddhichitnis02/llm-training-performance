@@ -1,0 +1,105 @@
+{
+ "config": {
+  "size": "medium",
+  "batch": 4,
+  "seq": 1024,
+  "dp": 1,
+  "tp": 1,
+  "pp": 1,
+  "microbatches": 1,
+  "machine_label": "final",
+  "out": null
+ },
+ "tag": "medium_b4_s1024_dp1_tp1_pp1_m1",
+ "ranks": 1,
+ "arch": "sm_120",
+ "time": "2026-10-23 21:37:45",
+ "per_rank": [
+  {
+   "rank": 0,
+   "nodes": 977,
+   "types": {
+    "memory copy": 316,
+    "reduction": 100,
+    "GEMM": 414,
+    "elementwise": 147
+   },
+   "flops": 9103183183872.0,
+   "bytes": 47827480576.0,
+   "comm_bytes": 0,
+   "predicted_compute_ms": 84.454
+  }
+ ],
+ "cross_check": {
+  "pass": true,
+  "categories": [
+   {
+    "category": "attention",
+    "export_flops": 721554505728.0,
+    "model_flops": 721554505728.0,
+    "flops_rel_diff": 0.0,
+    "export_bytes": 3630170112.0,
+    "model_bytes": 3630170112.0,
+    "bytes_rel_diff": 0.0
+   },
+   {
+    "category": "copy/cast",
+    "export_flops": 0.0,
+    "model_flops": 0.0,
+    "flops_rel_diff": 0.0,
+    "export_bytes": 5567414272.0,
+    "model_bytes": 5567414272.0,
+    "bytes_rel_diff": 0.0
+   },
+   {
+    "category": "elementwise",
+    "export_flops": 0.0,
+    "model_flops": 0.0,
+    "flops_rel_diff": 0.0,
+    "export_bytes": 13555990528.0,
+    "model_bytes": 13555990528.0,
+    "bytes_rel_diff": 0.0
+   },
+   {
+    "category": "loss",
+    "export_flops": 0.0,
+    "model_flops": 0.0,
+    "flops_rel_diff": 0.0,
+    "export_bytes": 739246080.0,
+    "model_bytes": 739246080.0,
+    "bytes_rel_diff": 0.0
+   },
+   {
+    "category": "matmul",
+    "export_flops": 8381628678144.0,
+    "model_flops": 8381628678144.0,
+    "flops_rel_diff": 0.0,
+    "export_bytes": 13866369024.0,
+    "model_bytes": 13866369024.0,
+    "bytes_rel_diff": 0.0
+   },
+   {
+    "category": "optimizer",
+    "export_flops": 0.0,
+    "model_flops": 0.0,
+    "flops_rel_diff": 0.0,
+    "export_bytes": 10468290560.0,
+    "model_bytes": 10468290560.0,
+    "bytes_rel_diff": 0.0
+   }
+  ],
+  "total_flops": [
+   9103183183872.0,
+   9103183183872.0
+  ],
+  "total_bytes": [
+   47827480576.0,
+   47827480576.0
+  ]
+ },
+ "files": {
+  "json": "graph.rank<r>.json",
+  "chakra": "workload.<r>.et",
+  "comm_groups": "comm_group.json"
+ }
+}

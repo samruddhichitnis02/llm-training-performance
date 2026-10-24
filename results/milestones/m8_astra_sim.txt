@@ -1,0 +1,13 @@
+medium_b2_s1024_dp2_tp2_pp2_m4 [replay]: step 87.28 ms, exposed comm 27.40 ms [8 of 8 ranks reported before a crash at shutdown] (+7.1% vs the scaling model), simulated in 2.0 s
+medium_b2_s1024_dp2_tp2_pp2_m4 [roofline]: step 53.79 ms, exposed comm 23.21 ms [7 of 8 ranks reported before a crash at shutdown] (-34.0% vs the scaling model), simulated in 2.2 s
+medium_b2_s1024_dp2_tp2_pp2_m4: scaling model 81.46 ms (compute 60.6, pipeline bubble 15.2, tensor parallel comm 4.2, pipeline sends 0.1, data parallel comm (exposed) 0.0, optimizer 1.3)
+  rank 0 compute: 59.85 ms predicted, 59.87 ms after rounding to whole us
+llama3-8b_b1_s4096_dp2_tp8_pp2_m4 [replay]: step 648.10 ms, exposed comm 272.57 ms [30 of 32 ranks reported before a crash at shutdown] (+16.0% vs the scaling model), simulated in 11.6 s
+llama3-8b_b1_s4096_dp2_tp8_pp2_m4 [roofline]: step 568.35 ms, exposed comm 276.48 ms [24 of 32 ranks reported before a crash at shutdown] (+1.8% vs the scaling model), simulated in 12.5 s
+llama3-8b_b1_s4096_dp2_tp8_pp2_m4: scaling model 558.52 ms (compute 382.7, pipeline bubble 95.7, tensor parallel comm 65.6, pipeline sends 7.5, data parallel comm (exposed) 0.0, optimizer 7.0)
+  rank 0 compute: 375.50 ms predicted, 375.53 ms after rounding to whole us
+tiny_b2_s256_dp2_tp2_pp2_m2 [replay]: step 4.77 ms, exposed comm 3.65 ms (+13.8% vs the scaling model), simulated in 0.4 s
+tiny_b2_s256_dp2_tp2_pp2_m2 [roofline]: step 4.41 ms, exposed comm 3.61 ms (+5.2% vs the scaling model), simulated in 0.4 s
+tiny_b2_s256_dp2_tp2_pp2_m2: scaling model 4.19 ms (compute 2.4, pipeline bubble 1.2, tensor parallel comm 0.4, pipeline sends 0.0, data parallel comm (exposed) 0.0, optimizer 0.2)
+  rank 0 compute: 1.11 ms predicted, 1.12 ms after rounding to whole us
+Saved astra_sim_final.json

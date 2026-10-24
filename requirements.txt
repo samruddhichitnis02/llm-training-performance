@@ -9,3 +9,8 @@ tabulate==0.10.0
 anthropic==2.3.0
 python-dotenv==1.2.4
 pytest==9.1.1
+# Optional, used by the CUDA C++ extension build:
+#   ninja==1.13.0
+# Optional, only to decode the Chakra export with the official MLCommons protobuf classes
+# (workload_export/check_export.py skips that check without it):
+#   chakra @ git+https://github.com/mlcommons/chakra.git@ce00f3fb4a2be48fa061f5eff25d236ab341d1a3

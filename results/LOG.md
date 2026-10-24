@@ -439,3 +439,51 @@ Values are MFU. Tokens per second for each point are in `scaling_final.json` and
 - Communication constants are not measured (see above).
 - The compute side is calibrated on one sm_120 GPU with 32 GB, so this is a prediction for a cluster of these GPUs, not of data center GPUs.
 - Not modeled: interleaved or zero bubble pipeline schedules, sequence parallelism, overlap of tensor parallel communication with compute, stragglers, network congestion, the extra lm head and embedding work on the first and last pipeline stages, and context parallelism for long sequences.
+
+## Milestone 8: simulator workload export
+
+Code: `workload_export/export_trace.py`, `chakra_writer.py`, `check_export.py`, `observe_pytorch.py`, `run_astra_sim.py`, `workload_export/README.md`. Console output: `milestones/m8_*.txt`.
+
+NVIDIA's own processor and system simulators are proprietary. This export is an open format workload description of the same kind: the MLCommons Chakra execution trace, fed to the open source ASTRA-sim simulator.
+
+### What is exported
+
+One training step of the fused model (Triton kernels, bf16, SDPA, fused Adam), one graph per rank, for any dp x tp x pp layout:
+- **Compute nodes:** GEMM, elementwise, reduction and memory copy. Each has input and output tensors (shape, dtype), FLOPs, bytes read and written, its phase, layer and microbatch, and a predicted duration from the milestone 6 model (measured GEMM and attention times on this GPU).
+- **Collectives:** tensor parallel all reduces (2 forward and 2 backward per layer), pipeline sends and receives in 1F1B order, and one data parallel gradient all reduce per layer, issued as soon as that layer's last backward finishes so it can overlap.
+- **Dependencies:** data dependencies come from tensor names (an op depends on whoever wrote its inputs). Compute nodes are also chained by control dependencies into one in order stream, like one CUDA stream.
+- **Formats:** `graph.rank<r>.json`, Chakra `workload.<r>.et`, `comm_group.json` and `summary.json`. `chakra_writer.py` encodes the protobuf from the field numbers in `et_def.proto`, with no dependencies. Attribute names and types are the ones ASTRA-sim's feeder reads.
+
+Exported layouts (`results/workload_export_*.json`):
+
+| Layout | Ranks | Nodes on rank 0 | Collectives on rank 0 |
+|---|---|---|---|
+| medium, batch 4, 1 GPU | 1 | 977 | 0 |
+| medium, microbatch 2, dp2 tp2 pp2, 4 microbatches | 8 | 2146 | 205 + 4 sends + 4 receives |
+| Llama 3 8B, microbatch 1, seq 4096, dp2 tp8 pp2, 4 microbatches | 32 | 2854 | 273 + 4 sends + 4 receives |
+| tiny, dp2 tp2 pp2 (committed example in `workload_example/`) | 8 | 368 | 37 + 2 sends + 2 receives |
+
+### Checks
+
+1. **Against the performance model** (`milestones/m8_exports.txt`): the graph is built from tensor shapes, separately from the milestone 6 inventory. Summed FLOPs and bytes match it **exactly (0.0 relative difference) in every category, for all four layouts.** For `medium` on 1 GPU: matmul 8.3816 TFLOP and 13.866 GB, attention 0.7216 TFLOP and 3.630 GB, elementwise 13.556 GB, copies and casts 5.567 GB, optimizer 10.468 GB.
+2. **Official decoder** (`milestones/m8_check_official.txt`): all 49 `.et` files decode with MLCommons' generated protobuf classes (`chakra` package, commit `ce00f3f`) and match the JSON node for node. The round trip with this repo's own reader also passes.
+3. **Graph validity:** every dependency points to an earlier node, so the graph is acyclic. Every send has a receive on the peer with the same tag and size (128 pairs for the Llama layout). Every rank in a group issues the same collectives in the same order (8736 calls in 36 groups).
+4. **Against a real PyTorch trace** (`workload_et_crosscheck_final_medium_b4_s1024.json`): one real step recorded with `torch.profiler.ExecutionTraceObserver` (9729 operator nodes). It has the same 366 GEMM shapes as the export, the 120 forward block GEMMs in the same order, and the same 24 forward and 24 backward flash attention calls. The first comparison found 2 extra GEMMs in the trace. They turned out to be PyTorch recording `aten::mm` twice (the call and a nested redispatch), so the checker now counts only the outermost call.
+
+### ASTRA-sim
+
+Built from source: analytical network backend, commit `4ce9ecfe746a3ee5fe47559a11d91644d641fa7f`. Network: an NVLink class switch inside 8 GPU nodes and an InfiniBand class switch between nodes, with the same constants as `perf_model/links.json` (not measured). Source: `astra_sim_final.json`, `milestones/m8_astra_sim.txt`.
+
+| Layout | Scaling model (milestone 7) | ASTRA-sim, replay | ASTRA-sim, roofline |
+|---|---|---|---|
+| medium, dp2 tp2 pp2, 4 microbatches | 81.46 ms | 87.28 ms (+7.1%) | 53.79 ms (-34.0%) |
+| Llama 3 8B, dp2 tp8 pp2, 4 microbatches | 558.52 ms | 648.10 ms (+16.0%) | 568.35 ms (+1.8%) |
+| tiny, dp2 tp2 pp2, 2 microbatches | 4.19 ms | 4.77 ms (+13.8%) | 4.41 ms (+5.2%) |
+
+- **Replay mode** uses our predicted per op times, so compute is the same on both sides (59.87 ms on rank 0 for medium, against 59.85 ms before rounding to whole microseconds). The difference is all scheduling and communication. ASTRA-sim comes out 7 to 16% slower than the closed form scaling model. It simulates each collective as chunked ring steps with per step delays, where the scaling model uses one ring formula, and its exposed communication includes the time a stage waits on a receive.
+- **Roofline mode** has ASTRA-sim compute each op from FLOPs and bytes at the calibrated peak. For `medium` that is 34% faster than replay, because it assumes every GEMM runs at peak; milestone 6 measured these at 67 to 75% of peak. For Llama 3 8B the GEMMs are large enough that peak is close, and roofline lands within 2% of the scaling model.
+- The two independent tools agree within 16% on the same workload. That supports the milestone 7 predictions as far as schedule and overlap go. The link constants are still unmeasured on both sides.
+
+Known issue: this ASTRA-sim build sometimes crashes (`malloc_consolidate`, or a segfault) while printing statistics at shutdown, after the simulation has finished. Results are kept only when every pipeline stage reported and all reporting ranks of a stage agree to the tick. The JSON records `ranks_reported` for every run (for example 30 of 32 for the Llama replay run).
+
+Also found: ASTRA-sim's roofline computes `num_ops / min(peak, bw x num_ops / tensor_size)`, which divides zero by zero for a pure memory op with `num_ops = 0`. The first roofline runs hit an assertion. Memory ops now carry `num_ops = 1` in the `.et` file, which gives the correct `tensor_size / bandwidth`. The JSON keeps the exact FLOPs.

@@ -1,0 +1,36 @@
+medium_b4_s1024_dp1_tp1_pp1_m1: 1 ranks, 977 nodes on rank 0 ({'memory copy': 316, 'reduction': 100, 'GEMM': 414, 'elementwise': 147}), predicted compute 84.454 ms on rank 0
+cross check against perf_model inventory: PASS
+  attention    FLOPs     0.7216 T vs     0.7216 T (0.0e+00)   bytes     3.630 GB vs     3.630 GB (0.0e+00)
+  copy/cast    FLOPs     0.0000 T vs     0.0000 T (0.0e+00)   bytes     5.567 GB vs     5.567 GB (0.0e+00)
+  elementwise  FLOPs     0.0000 T vs     0.0000 T (0.0e+00)   bytes    13.556 GB vs    13.556 GB (0.0e+00)
+  loss         FLOPs     0.0000 T vs     0.0000 T (0.0e+00)   bytes     0.739 GB vs     0.739 GB (0.0e+00)
+  matmul       FLOPs     8.3816 T vs     8.3816 T (0.0e+00)   bytes    13.866 GB vs    13.866 GB (0.0e+00)
+  optimizer    FLOPs     0.0000 T vs     0.0000 T (0.0e+00)   bytes    10.468 GB vs    10.468 GB (0.0e+00)
+wrote /mnt/c/Users/yash/Downloads/Samruddhi/llm-training-performance/profiles/workload/medium_b4_s1024_dp1_tp1_pp1_m1
+medium_b2_s1024_dp2_tp2_pp2_m4: 8 ranks, 2146 nodes on rank 0 ({'memory copy': 632, 'reduction': 192, 'GEMM': 816, 'elementwise': 293, 'collective': 205, 'send': 4, 'recv': 4}), predicted compute 59.855 ms on rank 0
+cross check against perf_model inventory: PASS
+  attention    FLOPs     0.7216 T vs     0.7216 T (0.0e+00)   bytes     3.630 GB vs     3.630 GB (0.0e+00)
+  copy/cast    FLOPs     0.0000 T vs     0.0000 T (0.0e+00)   bytes    10.330 GB vs    10.330 GB (0.0e+00)
+  elementwise  FLOPs     0.0000 T vs     0.0000 T (0.0e+00)   bytes    20.267 GB vs    20.267 GB (0.0e+00)
+  loss         FLOPs     0.0000 T vs     0.0000 T (0.0e+00)   bytes     0.954 GB vs     0.954 GB (0.0e+00)
+  matmul       FLOPs     8.3816 T vs     8.3816 T (0.0e+00)   bytes    18.761 GB vs    18.761 GB (0.0e+00)
+  optimizer    FLOPs     0.0000 T vs     0.0000 T (0.0e+00)   bytes     5.235 GB vs     5.235 GB (0.0e+00)
+wrote /mnt/c/Users/yash/Downloads/Samruddhi/llm-training-performance/profiles/workload/medium_b2_s1024_dp2_tp2_pp2_m4
+llama3-8b_b1_s4096_dp2_tp8_pp2_m4: 32 ranks, 2854 nodes on rank 0 ({'memory copy': 840, 'reduction': 256, 'GEMM': 1088, 'elementwise': 389, 'collective': 273, 'send': 4, 'recv': 4}), predicted compute 375.502 ms on rank 0
+cross check against perf_model inventory: PASS
+  attention    FLOPs     7.6966 T vs     7.6966 T (0.0e+00)   bytes     7.256 GB vs     7.256 GB (0.0e+00)
+  copy/cast    FLOPs     0.0000 T vs     0.0000 T (0.0e+00)   bytes    60.586 GB vs    60.586 GB (0.0e+00)
+  elementwise  FLOPs     0.0000 T vs     0.0000 T (0.0e+00)   bytes   161.061 GB vs   161.061 GB (0.0e+00)
+  loss         FLOPs     0.0000 T vs     0.0000 T (0.0e+00)   bytes     3.444 GB vs     3.444 GB (0.0e+00)
+  matmul       FLOPs    92.2172 T vs    92.2172 T (0.0e+00)   bytes   114.583 GB vs   114.583 GB (0.0e+00)
+  optimizer    FLOPs     0.0000 T vs     0.0000 T (0.0e+00)   bytes    28.112 GB vs    28.112 GB (0.0e+00)
+wrote /mnt/c/Users/yash/Downloads/Samruddhi/llm-training-performance/profiles/workload/llama3-8b_b1_s4096_dp2_tp8_pp2_m4
+tiny_b2_s256_dp2_tp2_pp2_m2: 8 ranks, 368 nodes on rank 0 ({'memory copy': 108, 'reduction': 32, 'GEMM': 136, 'elementwise': 51, 'collective': 37, 'send': 2, 'recv': 2}), predicted compute 1.11 ms on rank 0
+cross check against perf_model inventory: PASS
+  attention    FLOPs     0.0038 T vs     0.0038 T (0.0e+00)   bytes     0.076 GB vs     0.076 GB (0.0e+00)
+  copy/cast    FLOPs     0.0000 T vs     0.0000 T (0.0e+00)   bytes     0.580 GB vs     0.580 GB (0.0e+00)
+  elementwise  FLOPs     0.0000 T vs     0.0000 T (0.0e+00)   bytes     0.428 GB vs     0.428 GB (0.0e+00)
+  loss         FLOPs     0.0000 T vs     0.0000 T (0.0e+00)   bytes     0.142 GB vs     0.142 GB (0.0e+00)
+  matmul       FLOPs     0.1293 T vs     0.1293 T (0.0e+00)   bytes     0.732 GB vs     0.732 GB (0.0e+00)
+  optimizer    FLOPs     0.0000 T vs     0.0000 T (0.0e+00)   bytes     0.819 GB vs     0.819 GB (0.0e+00)
+wrote results/workload_example/tiny_dp2_tp2_pp2

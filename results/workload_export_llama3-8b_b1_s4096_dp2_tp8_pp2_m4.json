@@ -1,0 +1,635 @@
+{
+ "config": {
+  "size": "llama3-8b",
+  "batch": 1,
+  "seq": 4096,
+  "dp": 2,
+  "tp": 8,
+  "pp": 2,
+  "microbatches": 4,
+  "machine_label": "final",
+  "out": null
+ },
+ "tag": "llama3-8b_b1_s4096_dp2_tp8_pp2_m4",
+ "ranks": 32,
+ "arch": "sm_120",
+ "time": "2026-10-23 21:37:56",
+ "per_rank": [
+  {
+   "rank": 0,
+   "nodes": 2854,
+   "types": {
+    "memory copy": 840,
+    "reduction": 256,
+    "GEMM": 1088,
+    "elementwise": 389,
+    "collective": 273,
+    "send": 4,
+    "recv": 4
+   },
+   "flops": 46729244180480.0,
+   "bytes": 181406793728.0,
+   "comm_bytes": 10732175360,
+   "predicted_compute_ms": 375.502
+  },
+  {
+   "rank": 1,
+   "nodes": 2854,
+   "types": {
+    "memory copy": 840,
+    "reduction": 256,
+    "GEMM": 1088,
+    "elementwise": 389,
+    "collective": 273,
+    "send": 4,
+    "recv": 4
+   },
+   "flops": 46729244180480.0,
+   "bytes": 181406793728.0,
+   "comm_bytes": 10732175360,
+   "predicted_compute_ms": 375.502
+  },
+  {
+   "rank": 2,
+   "nodes": 2854,
+   "types": {
+    "memory copy": 840,
+    "reduction": 256,
+    "GEMM": 1088,
+    "elementwise": 389,
+    "collective": 273,
+    "send": 4,
+    "recv": 4
+   },
+   "flops": 46729244180480.0,
+   "bytes": 181406793728.0,
+   "comm_bytes": 10732175360,
+   "predicted_compute_ms": 375.502
+  },
+  {
+   "rank": 3,
+   "nodes": 2854,
+   "types": {
+    "memory copy": 840,
+    "reduction": 256,
+    "GEMM": 1088,
+    "elementwise": 389,
+    "collective": 273,
+    "send": 4,
+    "recv": 4
+   },
+   "flops": 46729244180480.0,
+   "bytes": 181406793728.0,
+   "comm_bytes": 10732175360,
+   "predicted_compute_ms": 375.502
+  },
+  {
+   "rank": 4,
+   "nodes": 2854,
+   "types": {
+    "memory copy": 840,
+    "reduction": 256,
+    "GEMM": 1088,
+    "elementwise": 389,
+    "collective": 273,
+    "send": 4,
+    "recv": 4
+   },
+   "flops": 46729244180480.0,
+   "bytes": 181406793728.0,
+   "comm_bytes": 10732175360,
+   "predicted_compute_ms": 375.502
+  },
+  {
+   "rank": 5,
+   "nodes": 2854,
+   "types": {
+    "memory copy": 840,
+    "reduction": 256,
+    "GEMM": 1088,
+    "elementwise": 389,
+    "collective": 273,
+    "send": 4,
+    "recv": 4
+   },
+   "flops": 46729244180480.0,
+   "bytes": 181406793728.0,
+   "comm_bytes": 10732175360,
+   "predicted_compute_ms": 375.502
+  },
+  {
+   "rank": 6,
+   "nodes": 2854,
+   "types": {
+    "memory copy": 840,
+    "reduction": 256,
+    "GEMM": 1088,
+    "elementwise": 389,
+    "collective": 273,
+    "send": 4,
+    "recv": 4
+   },
+   "flops": 46729244180480.0,
+   "bytes": 181406793728.0,
+   "comm_bytes": 10732175360,
+   "predicted_compute_ms": 375.502
+  },
+  {
+   "rank": 7,
+   "nodes": 2854,
+   "types": {
+    "memory copy": 840,
+    "reduction": 256,
+    "GEMM": 1088,
+    "elementwise": 389,
+    "collective": 273,
+    "send": 4,
+    "recv": 4
+   },
+   "flops": 46729244180480.0,
+   "bytes": 181406793728.0,
+   "comm_bytes": 10732175360,
+   "predicted_compute_ms": 375.502
+  },
+  {
+   "rank": 8,
+   "nodes": 2894,
+   "types": {
+    "recv": 4,
+    "memory copy": 840,
+    "reduction": 272,
+    "GEMM": 1112,
+    "elementwise": 389,
+    "collective": 273,
+    "send": 4
+   },
+   "flops": 53184580026368.0,
+   "bytes": 193635401728.0,
+   "comm_bytes": 10732191744,
+   "predicted_compute_ms": 408.784
+  },
+  {
+   "rank": 9,
+   "nodes": 2894,
+   "types": {
+    "recv": 4,
+    "memory copy": 840,
+    "reduction": 272,
+    "GEMM": 1112,
+    "elementwise": 389,
+    "collective": 273,
+    "send": 4
+   },
+   "flops": 53184580026368.0,
+   "bytes": 193635401728.0,
+   "comm_bytes": 10732191744,
+   "predicted_compute_ms": 408.784
+  },
+  {
+   "rank": 10,
+   "nodes": 2894,
+   "types": {
+    "recv": 4,
+    "memory copy": 840,
+    "reduction": 272,
+    "GEMM": 1112,
+    "elementwise": 389,
+    "collective": 273,
+    "send": 4
+   },
+   "flops": 53184580026368.0,
+   "bytes": 193635401728.0,
+   "comm_bytes": 10732191744,
+   "predicted_compute_ms": 408.784
+  },
+  {
+   "rank": 11,
+   "nodes": 2894,
+   "types": {
+    "recv": 4,
+    "memory copy": 840,
+    "reduction": 272,
+    "GEMM": 1112,
+    "elementwise": 389,
+    "collective": 273,
+    "send": 4
+   },
+   "flops": 53184580026368.0,
+   "bytes": 193635401728.0,
+   "comm_bytes": 10732191744,
+   "predicted_compute_ms": 408.784
+  },
+  {
+   "rank": 12,
+   "nodes": 2894,
+   "types": {
+    "recv": 4,
+    "memory copy": 840,
+    "reduction": 272,
+    "GEMM": 1112,
+    "elementwise": 389,
+    "collective": 273,
+    "send": 4
+   },
+   "flops": 53184580026368.0,
+   "bytes": 193635401728.0,
+   "comm_bytes": 10732191744,
+   "predicted_compute_ms": 408.784
+  },
+  {
+   "rank": 13,
+   "nodes": 2894,
+   "types": {
+    "recv": 4,
+    "memory copy": 840,
+    "reduction": 272,
+    "GEMM": 1112,
+    "elementwise": 389,
+    "collective": 273,
+    "send": 4
+   },
+   "flops": 53184580026368.0,
+   "bytes": 193635401728.0,
+   "comm_bytes": 10732191744,
+   "predicted_compute_ms": 408.784
+  },
+  {
+   "rank": 14,
+   "nodes": 2894,
+   "types": {
+    "recv": 4,
+    "memory copy": 840,
+    "reduction": 272,
+    "GEMM": 1112,
+    "elementwise": 389,
+    "collective": 273,
+    "send": 4
+   },
+   "flops": 53184580026368.0,
+   "bytes": 193635401728.0,
+   "comm_bytes": 10732191744,
+   "predicted_compute_ms": 408.784
+  },
+  {
+   "rank": 15,
+   "nodes": 2894,
+   "types": {
+    "recv": 4,
+    "memory copy": 840,
+    "reduction": 272,
+    "GEMM": 1112,
+    "elementwise": 389,
+    "collective": 273,
+    "send": 4
+   },
+   "flops": 53184580026368.0,
+   "bytes": 193635401728.0,
+   "comm_bytes": 10732191744,
+   "predicted_compute_ms": 408.784
+  },
+  {
+   "rank": 16,
+   "nodes": 2854,
+   "types": {
+    "memory copy": 840,
+    "reduction": 256,
+    "GEMM": 1088,
+    "elementwise": 389,
+    "collective": 273,
+    "send": 4,
+    "recv": 4
+   },
+   "flops": 46729244180480.0,
+   "bytes": 181406793728.0,
+   "comm_bytes": 10732175360,
+   "predicted_compute_ms": 375.502
+  },
+  {
+   "rank": 17,
+   "nodes": 2854,
+   "types": {
+    "memory copy": 840,
+    "reduction": 256,
+    "GEMM": 1088,
+    "elementwise": 389,
+    "collective": 273,
+    "send": 4,
+    "recv": 4
+   },
+   "flops": 46729244180480.0,
+   "bytes": 181406793728.0,
+   "comm_bytes": 10732175360,
+   "predicted_compute_ms": 375.502
+  },
+  {
+   "rank": 18,
+   "nodes": 2854,
+   "types": {
+    "memory copy": 840,
+    "reduction": 256,
+    "GEMM": 1088,
+    "elementwise": 389,
+    "collective": 273,
+    "send": 4,
+    "recv": 4
+   },
+   "flops": 46729244180480.0,
+   "bytes": 181406793728.0,
+   "comm_bytes": 10732175360,
+   "predicted_compute_ms": 375.502
+  },
+  {
+   "rank": 19,
+   "nodes": 2854,
+   "types": {
+    "memory copy": 840,
+    "reduction": 256,
+    "GEMM": 1088,
+    "elementwise": 389,
+    "collective": 273,
+    "send": 4,
+    "recv": 4
+   },
+   "flops": 46729244180480.0,
+   "bytes": 181406793728.0,
+   "comm_bytes": 10732175360,
+   "predicted_compute_ms": 375.502
+  },
+  {
+   "rank": 20,
+   "nodes": 2854,
+   "types": {
+    "memory copy": 840,
+    "reduction": 256,
+    "GEMM": 1088,
+    "elementwise": 389,
+    "collective": 273,
+    "send": 4,
+    "recv": 4
+   },
+   "flops": 46729244180480.0,
+   "bytes": 181406793728.0,
+   "comm_bytes": 10732175360,
+   "predicted_compute_ms": 375.502
+  },
+  {
+   "rank": 21,
+   "nodes": 2854,
+   "types": {
+    "memory copy": 840,
+    "reduction": 256,
+    "GEMM": 1088,
+    "elementwise": 389,
+    "collective": 273,
+    "send": 4,
+    "recv": 4
+   },
+   "flops": 46729244180480.0,
+   "bytes": 181406793728.0,
+   "comm_bytes": 10732175360,
+   "predicted_compute_ms": 375.502
+  },
+  {
+   "rank": 22,
+   "nodes": 2854,
+   "types": {
+    "memory copy": 840,
+    "reduction": 256,
+    "GEMM": 1088,
+    "elementwise": 389,
+    "collective": 273,
+    "send": 4,
+    "recv": 4
+   },
+   "flops": 46729244180480.0,
+   "bytes": 181406793728.0,
+   "comm_bytes": 10732175360,
+   "predicted_compute_ms": 375.502
+  },
+  {
+   "rank": 23,
+   "nodes": 2854,
+   "types": {
+    "memory copy": 840,
+    "reduction": 256,
+    "GEMM": 1088,
+    "elementwise": 389,
+    "collective": 273,
+    "send": 4,
+    "recv": 4
+   },
+   "flops": 46729244180480.0,
+   "bytes": 181406793728.0,
+   "comm_bytes": 10732175360,
+   "predicted_compute_ms": 375.502
+  },
+  {
+   "rank": 24,
+   "nodes": 2894,
+   "types": {
+    "recv": 4,
+    "memory copy": 840,
+    "reduction": 272,
+    "GEMM": 1112,
+    "elementwise": 389,
+    "collective": 273,
+    "send": 4
+   },
+   "flops": 53184580026368.0,
+   "bytes": 193635401728.0,
+   "comm_bytes": 10732191744,
+   "predicted_compute_ms": 408.784
+  },
+  {
+   "rank": 25,
+   "nodes": 2894,
+   "types": {
+    "recv": 4,
+    "memory copy": 840,
+    "reduction": 272,
+    "GEMM": 1112,
+    "elementwise": 389,
+    "collective": 273,
+    "send": 4
+   },
+   "flops": 53184580026368.0,
+   "bytes": 193635401728.0,
+   "comm_bytes": 10732191744,
+   "predicted_compute_ms": 408.784
+  },
+  {
+   "rank": 26,
+   "nodes": 2894,
+   "types": {
+    "recv": 4,
+    "memory copy": 840,
+    "reduction": 272,
+    "GEMM": 1112,
+    "elementwise": 389,
+    "collective": 273,
+    "send": 4
+   },
+   "flops": 53184580026368.0,
+   "bytes": 193635401728.0,
+   "comm_bytes": 10732191744,
+   "predicted_compute_ms": 408.784
+  },
+  {
+   "rank": 27,
+   "nodes": 2894,
+   "types": {
+    "recv": 4,
+    "memory copy": 840,
+    "reduction": 272,
+    "GEMM": 1112,
+    "elementwise": 389,
+    "collective": 273,
+    "send": 4
+   },
+   "flops": 53184580026368.0,
+   "bytes": 193635401728.0,
+   "comm_bytes": 10732191744,
+   "predicted_compute_ms": 408.784
+  },
+  {
+   "rank": 28,
+   "nodes": 2894,
+   "types": {
+    "recv": 4,
+    "memory copy": 840,
+    "reduction": 272,
+    "GEMM": 1112,
+    "elementwise": 389,
+    "collective": 273,
+    "send": 4
+   },
+   "flops": 53184580026368.0,
+   "bytes": 193635401728.0,
+   "comm_bytes": 10732191744,
+   "predicted_compute_ms": 408.784
+  },
+  {
+   "rank": 29,
+   "nodes": 2894,
+   "types": {
+    "recv": 4,
+    "memory copy": 840,
+    "reduction": 272,
+    "GEMM": 1112,
+    "elementwise": 389,
+    "collective": 273,
+    "send": 4
+   },
+   "flops": 53184580026368.0,
+   "bytes": 193635401728.0,
+   "comm_bytes": 10732191744,
+   "predicted_compute_ms": 408.784
+  },
+  {
+   "rank": 30,
+   "nodes": 2894,
+   "types": {
+    "recv": 4,
+    "memory copy": 840,
+    "reduction": 272,
+    "GEMM": 1112,
+    "elementwise": 389,
+    "collective": 273,
+    "send": 4
+   },
+   "flops": 53184580026368.0,
+   "bytes": 193635401728.0,
+   "comm_bytes": 10732191744,
+   "predicted_compute_ms": 408.784
+  },
+  {
+   "rank": 31,
+   "nodes": 2894,
+   "types": {
+    "recv": 4,
+    "memory copy": 840,
+    "reduction": 272,
+    "GEMM": 1112,
+    "elementwise": 389,
+    "collective": 273,
+    "send": 4
+   },
+   "flops": 53184580026368.0,
+   "bytes": 193635401728.0,
+   "comm_bytes": 10732191744,
+   "predicted_compute_ms": 408.784
+  }
+ ],
+ "cross_check": {
+  "pass": true,
+  "categories": [
+   {
+    "category": "attention",
+    "export_flops": 7696581394432.0,
+    "model_flops": 7696581394432.0,
+    "flops_rel_diff": 0.0,
+    "export_bytes": 7256145920.0,
+    "model_bytes": 7256145920.0,
+    "bytes_rel_diff": 0.0
+   },
+   {
+    "category": "copy/cast",
+    "export_flops": 0.0,
+    "model_flops": 0.0,
+    "flops_rel_diff": 0.0,
+    "export_bytes": 60585672704.0,
+    "model_bytes": 60585672704.0,
+    "bytes_rel_diff": 0.0
+   },
+   {
+    "category": "elementwise",
+    "export_flops": 0.0,
+    "model_flops": 0.0,
+    "flops_rel_diff": 0.0,
+    "export_bytes": 161061273600.0,
+    "model_bytes": 161061273600.0,
+    "bytes_rel_diff": 0.0
+   },
+   {
+    "category": "loss",
+    "export_flops": 0.0,
+    "model_flops": 0.0,
+    "flops_rel_diff": 0.0,
+    "export_bytes": 3443523584.0,
+    "model_bytes": 3443523584.0,
+    "bytes_rel_diff": 0.0
+   },
+   {
+    "category": "matmul",
+    "export_flops": 92217242812416.0,
+    "model_flops": 92217242812416.0,
+    "flops_rel_diff": 0.0,
+    "export_bytes": 114583142400.0,
+    "model_bytes": 114583142400.0,
+    "bytes_rel_diff": 0.0
+   },
+   {
+    "category": "optimizer",
+    "export_flops": 0.0,
+    "model_flops": 0.0,
+    "flops_rel_diff": 0.0,
+    "export_bytes": 28112437248.0,
+    "model_bytes": 28112437248.0,
+    "bytes_rel_diff": 0.0
+   }
+  ],
+  "total_flops": [
+   99913824206848.0,
+   99913824206848.0
+  ],
+  "total_bytes": [
+   375042195456.0,
+   375042195456.0
+  ]
+ },
+ "files": {
+  "json": "graph.rank<r>.json",
+  "chakra": "workload.<r>.et",
+  "comm_groups": "comm_group.json"
+ }
+}

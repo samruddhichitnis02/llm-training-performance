@@ -1,0 +1,16 @@
+medium_b4_s1024_dp1_tp1_pp1_m1: 1 ranks
+  round trip .et <-> JSON: PASS
+  official chakra decoder: PASS (decoded 1 files with chakra et_def_pb2 (schema metadata version '0.0.4'))
+  graph validity: PASS (0 send/recv pairs matched, 0 collective calls consistent across 3 groups)
+medium_b2_s1024_dp2_tp2_pp2_m4: 8 ranks
+  round trip .et <-> JSON: PASS
+  official chakra decoder: PASS (decoded 8 files with chakra et_def_pb2 (schema metadata version '0.0.4'))
+  graph validity: PASS (32 send/recv pairs matched, 1640 collective calls consistent across 12 groups)
+llama3-8b_b1_s4096_dp2_tp8_pp2_m4: 32 ranks
+  round trip .et <-> JSON: PASS
+  official chakra decoder: PASS (decoded 32 files with chakra et_def_pb2 (schema metadata version '0.0.4'))
+  graph validity: PASS (128 send/recv pairs matched, 8736 collective calls consistent across 36 groups)
+tiny_dp2_tp2_pp2: 8 ranks
+  round trip .et <-> JSON: PASS
+  official chakra decoder: PASS (decoded 8 files with chakra et_def_pb2 (schema metadata version '0.0.4'))
+  graph validity: PASS (16 send/recv pairs matched, 296 collective calls consistent across 12 groups)

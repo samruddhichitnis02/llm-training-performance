@@ -1,0 +1,227 @@
+{
+ "config": {
+  "size": "medium",
+  "batch": 2,
+  "seq": 1024,
+  "dp": 2,
+  "tp": 2,
+  "pp": 2,
+  "microbatches": 4,
+  "machine_label": "final",
+  "out": null
+ },
+ "tag": "medium_b2_s1024_dp2_tp2_pp2_m4",
+ "ranks": 8,
+ "arch": "sm_120",
+ "time": "2026-10-23 21:37:47",
+ "per_rank": [
+  {
+   "rank": 0,
+   "nodes": 2146,
+   "types": {
+    "memory copy": 632,
+    "reduction": 192,
+    "GEMM": 816,
+    "elementwise": 293,
+    "collective": 205,
+    "send": 4,
+    "recv": 4
+   },
+   "flops": 4148938407936.0,
+   "bytes": 28170158080.0,
+   "comm_bytes": 1195999232,
+   "predicted_compute_ms": 59.855
+  },
+  {
+   "rank": 1,
+   "nodes": 2146,
+   "types": {
+    "memory copy": 632,
+    "reduction": 192,
+    "GEMM": 816,
+    "elementwise": 293,
+    "collective": 205,
+    "send": 4,
+    "recv": 4
+   },
+   "flops": 4148938407936.0,
+   "bytes": 28170158080.0,
+   "comm_bytes": 1195999232,
+   "predicted_compute_ms": 59.855
+  },
+  {
+   "rank": 2,
+   "nodes": 2170,
+   "types": {
+    "recv": 4,
+    "memory copy": 632,
+    "reduction": 204,
+    "GEMM": 828,
+    "elementwise": 293,
+    "collective": 205,
+    "send": 4
+   },
+   "flops": 4954244775936.0,
+   "bytes": 31006584832.0,
+   "comm_bytes": 1196003328,
+   "predicted_compute_ms": 64.618
+  },
+  {
+   "rank": 3,
+   "nodes": 2170,
+   "types": {
+    "recv": 4,
+    "memory copy": 632,
+    "reduction": 204,
+    "GEMM": 828,
+    "elementwise": 293,
+    "collective": 205,
+    "send": 4
+   },
+   "flops": 4954244775936.0,
+   "bytes": 31006584832.0,
+   "comm_bytes": 1196003328,
+   "predicted_compute_ms": 64.618
+  },
+  {
+   "rank": 4,
+   "nodes": 2146,
+   "types": {
+    "memory copy": 632,
+    "reduction": 192,
+    "GEMM": 816,
+    "elementwise": 293,
+    "collective": 205,
+    "send": 4,
+    "recv": 4
+   },
+   "flops": 4148938407936.0,
+   "bytes": 28170158080.0,
+   "comm_bytes": 1195999232,
+   "predicted_compute_ms": 59.855
+  },
+  {
+   "rank": 5,
+   "nodes": 2146,
+   "types": {
+    "memory copy": 632,
+    "reduction": 192,
+    "GEMM": 816,
+    "elementwise": 293,
+    "collective": 205,
+    "send": 4,
+    "recv": 4
+   },
+   "flops": 4148938407936.0,
+   "bytes": 28170158080.0,
+   "comm_bytes": 1195999232,
+   "predicted_compute_ms": 59.855
+  },
+  {
+   "rank": 6,
+   "nodes": 2170,
+   "types": {
+    "recv": 4,
+    "memory copy": 632,
+    "reduction": 204,
+    "GEMM": 828,
+    "elementwise": 293,
+    "collective": 205,
+    "send": 4
+   },
+   "flops": 4954244775936.0,
+   "bytes": 31006584832.0,
+   "comm_bytes": 1196003328,
+   "predicted_compute_ms": 64.618
+  },
+  {
+   "rank": 7,
+   "nodes": 2170,
+   "types": {
+    "recv": 4,
+    "memory copy": 632,
+    "reduction": 204,
+    "GEMM": 828,
+    "elementwise": 293,
+    "collective": 205,
+    "send": 4
+   },
+   "flops": 4954244775936.0,
+   "bytes": 31006584832.0,
+   "comm_bytes": 1196003328,
+   "predicted_compute_ms": 64.618
+  }
+ ],
+ "cross_check": {
+  "pass": true,
+  "categories": [
+   {
+    "category": "attention",
+    "export_flops": 721554505728.0,
+    "model_flops": 721554505728.0,
+    "flops_rel_diff": 0.0,
+    "export_bytes": 3630170112.0,
+    "model_bytes": 3630170112.0,
+    "bytes_rel_diff": 0.0
+   },
+   {
+    "category": "copy/cast",
+    "export_flops": 0.0,
+    "model_flops": 0.0,
+    "flops_rel_diff": 0.0,
+    "export_bytes": 10329522176.0,
+    "model_bytes": 10329522176.0,
+    "bytes_rel_diff": 0.0
+   },
+   {
+    "category": "elementwise",
+    "export_flops": 0.0,
+    "model_flops": 0.0,
+    "flops_rel_diff": 0.0,
+    "export_bytes": 20266876928.0,
+    "model_bytes": 20266876928.0,
+    "bytes_rel_diff": 0.0
+   },
+   {
+    "category": "loss",
+    "export_flops": 0.0,
+    "model_flops": 0.0,
+    "flops_rel_diff": 0.0,
+    "export_bytes": 954204160.0,
+    "model_bytes": 954204160.0,
+    "bytes_rel_diff": 0.0
+   },
+   {
+    "category": "matmul",
+    "export_flops": 8381628678144.0,
+    "model_flops": 8381628678144.0,
+    "flops_rel_diff": 0.0,
+    "export_bytes": 18761121792.0,
+    "model_bytes": 18761121792.0,
+    "bytes_rel_diff": 0.0
+   },
+   {
+    "category": "optimizer",
+    "export_flops": 0.0,
+    "model_flops": 0.0,
+    "flops_rel_diff": 0.0,
+    "export_bytes": 5234847744.0,
+    "model_bytes": 5234847744.0,
+    "bytes_rel_diff": 0.0
+   }
+  ],
+  "total_flops": [
+   9103183183872.0,
+   9103183183872.0
+  ],
+  "total_bytes": [
+   59176742912.0,
+   59176742912.0
+  ]
+ },
+ "files": {
+  "json": "graph.rank<r>.json",
+  "chakra": "workload.<r>.et",
+  "comm_groups": "comm_group.json"
+ }
+}
