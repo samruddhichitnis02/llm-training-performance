@@ -1,0 +1,33 @@
+sm_120 (final) | calibration: bf16 227.5 TFLOPs, DRAM 1441.3 GB/s, L2 3428.0 GB/s (96 MB), CPU issue 6.5 us and GPU gap 0.937 us per kernel | bf16 reached this run: 223.4 TFLOPs
+
+tiny    unfused (row 4)  measured    66.98 ms | roofline    53.92 ms ( -19.5%) | calibrated    60.14 ms ( -10.2%) | MFU 32.6% | GEMM efficiency 80%
+tiny    fused (row 6)    measured    35.80 ms | roofline    30.78 ms ( -14.0%) | calibrated    36.71 ms (  +2.5%) | MFU 60.9% | GEMM efficiency 81%
+small   unfused (row 4)  measured    78.61 ms | roofline    59.95 ms ( -23.7%) | calibrated    72.30 ms (  -8.0%) | MFU 40.5% | GEMM efficiency 72%
+small   fused (row 6)    measured    52.03 ms | roofline    41.14 ms ( -20.9%) | calibrated    53.52 ms (  +2.9%) | MFU 61.2% | GEMM efficiency 72%
+medium  unfused (row 4)  measured   108.07 ms | roofline    80.80 ms ( -25.2%) | calibrated   101.39 ms (  -6.2%) | MFU 36.6% | GEMM efficiency 67%
+medium  fused (row 6)    measured    78.76 ms | roofline    61.43 ms ( -22.0%) | calibrated    82.33 ms (  +4.5%) | MFU 50.2% | GEMM efficiency 67%
+large   unfused (row 4)  measured   118.05 ms | roofline    95.00 ms ( -19.5%) | calibrated   112.25 ms (  -4.9%) | MFU 41.6% | GEMM efficiency 75%
+large   fused (row 6)    measured    99.57 ms | roofline    82.59 ms ( -17.1%) | calibrated    99.85 ms (  +0.3%) | MFU 49.3% | GEMM efficiency 75%
+medium  unfused (row 4)  measured   109.47 ms | roofline    84.63 ms ( -22.7%) | calibrated   108.21 ms (  -1.1%) | MFU 43.6% | GEMM efficiency 67%
+medium  fused (row 6)    measured    86.31 ms | roofline    65.26 ms ( -24.4%) | calibrated    89.15 ms (  +3.3%) | MFU 55.3% | GEMM efficiency 67%
+
+mean absolute error: {
+ "torch roofline mean abs error pct": 22.14,
+ "torch calibrated mean abs error pct": 6.1,
+ "triton roofline mean abs error pct": 19.68,
+ "triton calibrated mean abs error pct": 2.7
+}
+
+MFU gap, ms per step (calibrated model; residual = measured minus everything modeled):
+  tiny unfused (row 4): ideal (model FLOPs at bf16 peak) 21.8, matmul below peak 4.5, attention 3.9, memory bound elementwise, casts, loss 31.6, optimizer 1.1, launch overhead 0.9, idle and unmodeled (residual) 3.2
+  tiny fused (row 6): ideal (model FLOPs at bf16 peak) 21.8, matmul below peak 4.2, attention 3.9, memory bound elementwise, casts, loss 9.0, optimizer 1.1, launch overhead 0.4, idle and unmodeled (residual) -4.5
+  small unfused (row 4): ideal (model FLOPs at bf16 peak) 31.8, matmul below peak 9.4, attention 7.7, memory bound elementwise, casts, loss 27.6, optimizer 2.6, launch overhead 1.3, idle and unmodeled (residual) -1.8
+  small fused (row 6): ideal (model FLOPs at bf16 peak) 31.8, matmul below peak 9.4, attention 7.7, memory bound elementwise, casts, loss 9.6, optimizer 2.6, launch overhead 0.5, idle and unmodeled (residual) -9.6
+  medium unfused (row 4): ideal (model FLOPs at bf16 peak) 39.6, matmul below peak 18.2, attention 4.9, memory bound elementwise, casts, loss 31.6, optimizer 7.3, launch overhead 2.6, idle and unmodeled (residual) 4.0
+  medium fused (row 6): ideal (model FLOPs at bf16 peak) 39.6, matmul below peak 18.5, attention 4.9, memory bound elementwise, casts, loss 13.8, optimizer 7.3, launch overhead 1.0, idle and unmodeled (residual) -6.3
+  large unfused (row 4): ideal (model FLOPs at bf16 peak) 49.1, matmul below peak 15.7, attention 3.2, memory bound elementwise, casts, loss 26.0, optimizer 18.3, launch overhead 1.7, idle and unmodeled (residual) 4.0
+  large fused (row 6): ideal (model FLOPs at bf16 peak) 49.1, matmul below peak 15.7, attention 3.2, memory bound elementwise, casts, loss 14.7, optimizer 18.3, launch overhead 0.7, idle and unmodeled (residual) -2.1
+  medium unfused (row 4): ideal (model FLOPs at bf16 peak) 47.7, matmul below peak 18.2, attention 11.7, memory bound elementwise, casts, loss 31.6, optimizer 7.3, launch overhead 2.6, idle and unmodeled (residual) -9.6
+  medium fused (row 6): ideal (model FLOPs at bf16 peak) 47.7, matmul below peak 18.5, attention 11.7, memory bound elementwise, casts, loss 13.8, optimizer 7.3, launch overhead 1.0, idle and unmodeled (residual) -13.7
+
+Saved perf_model_validation_final_holdout.json, perf_model_validation_final_holdout.png, mfu_gap_final_holdout.png

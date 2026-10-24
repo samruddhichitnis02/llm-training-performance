@@ -1,0 +1,46 @@
+shape {'d': 1024, 'L': 24, 'H': 16, 'ffn': 2816, 'vocab': 32000, 'kv_heads': None} (374M params), batch 4, seq 1024, bf16
+machine sm_120 (final): bf16 227.5 TFLOPs, fp32 65.3 TFLOPs, DRAM 1441.3 GB/s, L2 3428.0 GB/s (96.0 MB), CPU issue 6.5 us and GPU gap 0.937 us per kernel
+GEMM and attention timing: 20 of 20 shapes measured on this GPU; the rest use the peak times the measured large GEMM efficiency (89%)
+
+unfused (PyTorch ops): predicted 103.64 ms per step (GPU bound: GPU 103.64 ms, CPU issue 18.02 ms)
+  matmul           55.04 ms  (53.1%)
+  attention         7.16 ms  ( 6.9%)
+  elementwise      23.10 ms  (22.3%)
+  copy/cast         6.17 ms  ( 5.9%)
+  loss              2.32 ms  ( 2.2%)
+  optimizer         7.26 ms  ( 7.0%)
+  launches          2.60 ms  (2772 kernels)
+  predicted MFU 40.8%  (model FLOPs 9.62 T per step)
+       7.263 ms  memory   AI      0.0  fused AdamW
+       6.095 ms  memory   AI      0.0  rmsnorm backward (eager, about 12 kernels)
+       5.172 ms  measured  AI   182.86  flash attention backward
+       4.688 ms  measured  AI   646.74  qkv weight gradient
+       4.687 ms  measured  AI   634.59  w2 weight gradient
+       4.685 ms  measured  AI   634.59  w1 weight gradient
+  what if bw=2: 84.22 ms (-18.7%)
+  what if bw=0.5: 142.49 ms (+37.5%)
+  what if peak=2: 72.54 ms (-30.0%)
+  what if launch=0: 101.05 ms (-2.5%)
+  what if launch=3: 108.84 ms (+5.0%)
+
+fused (Triton kernels): predicted 84.58 ms per step (GPU bound: GPU 84.58 ms, CPU issue 7.14 ms)
+  matmul           55.34 ms  (65.4%)
+  attention         7.16 ms  ( 8.5%)
+  elementwise       9.41 ms  (11.1%)
+  copy/cast         3.86 ms  ( 4.6%)
+  loss              0.51 ms  ( 0.6%)
+  optimizer         7.26 ms  ( 8.6%)
+  launches          1.03 ms  (1099 kernels)
+  predicted MFU 50.0%  (model FLOPs 9.62 T per step)
+       7.263 ms  memory   AI      0.0  fused AdamW
+       5.172 ms  measured  AI   182.86  flash attention backward
+       4.688 ms  measured  AI   646.74  qkv weight gradient
+       4.687 ms  measured  AI   634.59  w2 weight gradient
+       4.685 ms  measured  AI   634.59  w1 weight gradient
+       4.685 ms  measured  AI   634.59  w3 weight gradient
+  what if bw=2: 74.06 ms (-12.4%)
+  what if bw=0.5: 105.62 ms (+24.9%)
+  what if peak=2: 53.33 ms (-37.0%)
+  what if launch=0: 83.55 ms (-1.2%)
+  what if launch=3: 86.64 ms (+2.4%)
+

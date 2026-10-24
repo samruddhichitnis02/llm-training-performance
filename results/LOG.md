@@ -309,3 +309,79 @@ Profile (`profile_final_sm_120_medium_b4_s1024_bf16_sdpa_fusedadam_triton_fp8.js
 The NVFP4 block GEMMs are 5.6x faster than bf16 inside the real step, matching the 5.7x from calibration. The step does not get faster because quantization costs twice the FP4 GEMM time and the 4033 launches per step leave the GPU idle 37% of the time. Details and the path to a real FP4 speedup: `optimizations/09_fp8_fp4_linears.md`.
 
 NVFP4 quantizer, alone (`milestones/m5_nvfp4_quantizer_timing.txt`, a (4096, 2816) bf16 tensor): 38 to 57 us per call, 510 to 760 GB/s. The first `torch.compile` version made the `small` step 120.7 ms, 2.4x slower than bf16; the Triton kernel brought it to parity.
+
+## Milestone 6: performance model
+
+Code: `perf_model/roofline.py` (operation inventory, prediction, what if tool), `perf_model/validate.py` (measured against predicted, MFU gap). Console output: `milestones/m6_*.txt`.
+
+### How the model works
+
+`inventory()` lists every GPU op in one training step as `bench_train.py` runs it: the 5 block GEMMs and their 10 backward GEMMs, flash attention forward and backward (or the naive attention ops), norms, RoPE, SwiGLU, residual adds, autocast weight casts, gradient casts, the embedding, the lm head and loss, and the optimizer. Each op has FLOPs, bytes moved, kernel launches and calls per step. There are two inventories: the PyTorch model (ladder row 4) and the fused model (row 6). Grouped query attention and a tensor parallel degree are supported, so it also takes Llama 3 shapes and the sharded shapes the scaling model needs.
+
+Time per op is `max(FLOPs / peak, memory time)`, summed over ops, with two refinements found by the first validation (below):
+1. **Launches.** The calibrated 6.5 us per launch is the CPU cost of issuing a kernel from PyTorch eager. The CPU runs ahead of the GPU, so that cost only shows up when the CPU falls behind. On the GPU itself, back to back kernels cost 0.94 us each (measured by replaying 1000 tiny kernels from a CUDA graph). The model now takes `max(GPU time, CPU issue time)`, with GPU time = ops + launches x 0.94 us.
+2. **L2.** Multi kernel eager ops (the eager RMSNorm is 7 kernels forward and about 12 backward) pass intermediates from kernel to kernel. If those fit in half of the 96 MB L2, they move at the measured L2 bandwidth of 3428 GB/s, not DRAM's 1441 GB/s. Only the op's real inputs and outputs go to DRAM.
+
+Two prediction levels:
+- **Roofline:** calibration peaks only. This is what the hardware would allow with perfect GEMMs.
+- **Calibrated:** each distinct GEMM and attention shape timed once on this GPU (`shape_calibration_final.json`, L2 flushed, median). Elementwise ops stay roofline. Shapes too big to time (Llama 3) use the peak times the efficiency measured on the largest timed GEMMs, 89%.
+
+### Validation
+
+Sources: `perf_model_validation_final.json`, `perf_model_validation_final.png`. Steps measured fresh in this session.
+
+| Config | Measured ms | Roofline ms | Error | Calibrated ms | Error | Measured MFU |
+|---|---|---|---|---|---|---|
+| small b8 s1024, unfused | 74.43 | 57.57 | -22.6% | 69.21 | **-7.0%** | 37.3% |
+| small b8 s1024, fused | 49.04 | 38.76 | -21.0% | 50.43 | **+2.8%** | 56.6% |
+| medium b4 s1024, unfused | 109.75 | 81.46 | -25.8% | 103.64 | **-5.6%** | 38.5% |
+| medium b4 s1024, fused | 81.64 | 62.09 | -23.9% | 84.58 | **+3.6%** | 51.8% |
+| large b2 s1024, unfused | 118.98 | 95.43 | -19.8% | 113.90 | **-4.3%** | 42.8% |
+| large b2 s1024, fused | 109.71 | 83.03 | -24.3% | 101.50 | **-7.5%** | 46.4% |
+
+**Mean absolute error of the calibrated model: 5.6% unfused, 4.6% fused.** The roofline alone underpredicts by about 22% for every size; that 22% is GEMM inefficiency, which it cannot see.
+
+Held out check (`perf_model_validation_final_holdout.json`): five configurations the model was never compared against while it was being built (tiny b16 s1024, small b4 s2048, medium b8 s512, large b4 s512, medium b2 s2048). Calibrated mean absolute error **6.1% unfused, 2.7% fused**; worst case -10.2% (tiny, unfused).
+
+How good is that? The same config measured in two sessions of this milestone came out 102.94 ms and 109.75 ms (medium, unfused), a 6.6% difference from the GPU's clock state alone. The model's error is about the size of that noise.
+
+What the first version got wrong (`milestones/m6_validate_v1.txt`): it charged the full 6.5 us CPU launch cost to every kernel and sent all eager traffic to DRAM. The calibrated prediction was 28.5% too high for the unfused model. Both fixes above come from that run. The roofline column moved down at the same time, since it shares those fixes.
+
+### Where the time goes (MFU gap)
+
+Source: `mfu_gap_final.png`. Calibrated model, ms per step. "Ideal" is the model FLOPs at the bf16 peak.
+
+| Category | medium unfused | medium fused | large fused |
+|---|---|---|---|
+| ideal matmul time | 42.3 | 42.3 | 50.9 |
+| matmuls below peak | 18.2 | 18.5 | 15.7 |
+| attention | 7.2 | 7.2 | 4.9 |
+| memory bound elementwise, casts, loss | 31.6 | 13.8 | 14.7 |
+| optimizer | 7.3 | 7.3 | 18.3 |
+| launch gaps | 2.6 | 1.0 | 0.7 |
+| measured total | 109.75 | 81.64 | 109.71 |
+| MFU | 38.5% | 51.8% | 46.4% |
+
+1. **Matmuls run at 67 to 75% of the bf16 peak** at these shapes (`matmul_efficiency` in the JSON). cuBLAS picks `cutlass_80` kernels on this GPU (milestone 2), and these GEMMs are small next to an 8192 cube. That costs 16 to 19 ms per step and is the largest loss left in the fused model.
+2. **Memory bound ops** are the largest loss in the unfused model (31.6 ms). The Triton kernels cut that to 13.8 ms. What remains is mostly autocast casts and the residual adds.
+3. **The optimizer grows with parameters, not with tokens.** For `large` (940M params) fused Adam moves 26 GB per step and takes 18.3 ms, as much as the GEMM inefficiency. Larger batches spread it over more tokens.
+4. **Launch overhead is small** once the GPU is busy: the CPU issues 1099 kernels in about 7 ms while the GPU works for 85 ms. It only becomes the bottleneck when GPU work per kernel gets small, as in the NVFP4 row of milestone 5 (37% idle).
+
+### What if
+
+Source: `milestones/m6_what_if_medium.txt`, `perf_model_medium_b4_s1024.json`. `medium`, batch 4, seq 1024.
+
+| Scenario | unfused | fused |
+|---|---|---|
+| as measured on this GPU (predicted) | 103.64 ms | 84.58 ms |
+| memory bandwidth doubled | 84.22 ms (-18.7%) | 74.06 ms (-12.4%) |
+| memory bandwidth halved | 142.49 ms (+37.5%) | 105.62 ms (+24.9%) |
+| matmul peak doubled | 72.54 ms (-30.0%) | 53.33 ms (-37.0%) |
+| no launch cost at all | 101.05 ms (-2.5%) | 83.55 ms (-1.2%) |
+| launch cost 3x | 108.84 ms (+5.0%) | 86.64 ms (+2.4%) |
+
+Fusion moves the step from bandwidth sensitive to compute sensitive. Doubling bandwidth helps the unfused model 18.7% but the fused one only 12.4%; doubling the matmul peak helps the fused model more (37.0% against 30.0%).
+
+### Llama 3 8B on one GPU (prediction only)
+
+Source: `milestones/m6_llama3_8b_single_gpu.txt`. Llama 3 8B shape (d 4096, 32 layers, 8 KV heads, ffn 14336, vocab 128256), batch 1, seq 4096, fused model, on this GPU's calibration: **1268 ms per step, 73% MFU**. Matmuls are 72% of the time, the optimizer 12%. This is a model of the compute only. It cannot actually run here: fp32 weights, gradients and Adam state for 8B parameters need about 128 GB. The scaling model in milestone 7 shards it.

@@ -1,0 +1,21 @@
+shape {'d': 4096, 'L': 32, 'H': 32, 'ffn': 14336, 'vocab': 128256, 'kv_heads': 8} (8030M params), batch 1, seq 4096, bf16
+machine sm_120 (final): bf16 227.5 TFLOPs, fp32 65.3 TFLOPs, DRAM 1441.3 GB/s, L2 3428.0 GB/s (96.0 MB), CPU issue 6.5 us and GPU gap 0.937 us per kernel
+GEMM and attention timing: 0 of 20 shapes measured on this GPU; the rest use the peak times the measured large GEMM efficiency (89%)
+
+fused (Triton kernels): predicted 1267.71 ms per step (GPU bound: GPU 1267.71 ms, CPU issue 9.48 ms)
+  matmul          912.51 ms  (72.0%)
+  attention        76.16 ms  ( 6.0%)
+  elementwise      50.10 ms  ( 4.0%)
+  copy/cast        68.43 ms  ( 5.4%)
+  loss              3.15 ms  ( 0.2%)
+  optimizer       156.00 ms  (12.3%)
+  launches          1.37 ms  (1458 kernels)
+  predicted MFU 73.1%  (model FLOPs 210.83 T per step)
+     156.003 ms  memory   AI      0.0  fused AdamW
+      76.159 ms  estimated  AI   1792.0  w1 (gate)
+      76.159 ms  estimated  AI   1792.0  w3 (up)
+      76.159 ms  estimated  AI   1792.0  w2 (down)
+      76.159 ms  estimated  AI   1792.0  w1 input gradient
+  what if bw=2: 1128.87 ms (-11.0%)
+  what if peak=2: 773.38 ms (-39.0%)
+
