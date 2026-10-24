@@ -1,0 +1,398 @@
+{
+  "arch": "sm_120",
+  "machine_label": "final",
+  "torch": "2.11.0+cu128",
+  "cuda": "12.8",
+  "os": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "python": "3.12.3",
+  "gpu_count": 1,
+  "sm_count": 170,
+  "gpu_mem_gb": 34.2,
+  "time": "2026-10-23 17:15:39",
+  "size": "medium",
+  "batch": 4,
+  "seq": 1024,
+  "config": {
+    "size": "medium",
+    "batch": 4,
+    "seq": 1024,
+    "precision": "bf16",
+    "attn": "sdpa",
+    "compile": true,
+    "fused_adam": true,
+    "ckpt": false,
+    "kernels": "torch"
+  },
+  "clean_step_ms": 79.851,
+  "profiled_steps": 3,
+  "gpu_busy_ms_per_step": 76.597,
+  "gpu_idle_pct": 4.08,
+  "launches_per_step": 1066.0,
+  "warning": null,
+  "buckets": {
+    "matmul": {
+      "ms_per_step": 55.0676,
+      "launches_per_step": 387.0,
+      "pct": 71.89
+    },
+    "attention": {
+      "ms_per_step": 6.0739,
+      "launches_per_step": 96.0,
+      "pct": 7.93
+    },
+    "optimizer": {
+      "ms_per_step": 7.3294,
+      "launches_per_step": 20.0,
+      "pct": 9.57
+    },
+    "memory copies": {
+      "ms_per_step": 6.3233,
+      "launches_per_step": 513.0,
+      "pct": 8.26
+    },
+    "elementwise and other": {
+      "ms_per_step": 1.8025,
+      "launches_per_step": 50.0,
+      "pct": 2.35
+    }
+  },
+  "top_kernels": [
+    {
+      "name": "void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x256_32x4_nt_align8>(cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x256_32x4_nt_align8::Params)",
+      "bucket": "matmul",
+      "calls_per_step": 120.0,
+      "ms_per_step": 20.0915,
+      "pct": 26.23
+    },
+    {
+      "name": "void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x128_32x3_tn_align8>(cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x128_32x3_tn_align8::Params)",
+      "bucket": "matmul",
+      "calls_per_step": 73.0,
+      "ms_per_step": 12.337,
+      "pct": 16.11
+    },
+    {
+      "name": "void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x256_32x4_nn_align8>(cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x256_32x4_nn_align8::Params)",
+      "bucket": "matmul",
+      "calls_per_step": 72.0,
+      "ms_per_step": 10.2345,
+      "pct": 13.36
+    },
+    {
+      "name": "void at::native::(anonymous namespace)::multi_tensor_apply_kernel<at::native::(anonymous namespace)::FusedOptimizerTensorListMetadata<4>, at::native::(anonymous namespace)::FusedAdamMathFunctor<float, 4, (at::native::ADAM_MODE)1, false>, float const*, double, double, double, double, double, bool, float const*, float const*>(at::native::(anonymous namespace)::FusedOptimizerTensorListMetadata<4>, at::native::(anonymous namespace)::FusedAdamMathFunctor<float, 4, (at::native::ADAM_MODE)1, false>, float const*, double, double, double, double, double, bool, float const*, float const*)",
+      "bucket": "optimizer",
+      "calls_per_step": 18.0,
+      "ms_per_step": 7.327,
+      "pct": 9.57
+    },
+    {
+      "name": "void pytorch_flash::flash_bwd_dq_dk_dv_loop_seqk_parallel_kernel<Flash_bwd_kernel_traits<64, 64, 128, 8, 2, 4, 4, true, false, cutlass::bfloat16_t, Flash_kernel_traits<64, 64, 128, 8, cutlass::bfloat16_t> >, false, true, false, false, true, true, false>(pytorch_flash::Flash_bwd_params)",
+      "bucket": "attention",
+      "calls_per_step": 24.0,
+      "ms_per_step": 4.0059,
+      "pct": 5.23
+    },
+    {
+      "name": "void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x128_32x3_nn_align8>(cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x128_32x3_nn_align8::Params)",
+      "bucket": "matmul",
+      "calls_per_step": 24.0,
+      "ms_per_step": 3.8551,
+      "pct": 5.03
+    },
+    {
+      "name": "void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x256_32x4_tn_align8>(cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x256_32x4_tn_align8::Params)",
+      "bucket": "matmul",
+      "calls_per_step": 24.0,
+      "ms_per_step": 3.4619,
+      "pct": 4.52
+    },
+    {
+      "name": "void pytorch_flash::flash_fwd_kernel<Flash_fwd_kernel_traits<64, 128, 128, 4, false, false, cutlass::bfloat16_t, Flash_kernel_traits<64, 128, 128, 4, cutlass::bfloat16_t> >, false, true, false, false, true, true, false, false>(pytorch_flash::Flash_fwd_params)",
+      "bucket": "attention",
+      "calls_per_step": 24.0,
+      "ms_per_step": 1.7611,
+      "pct": 2.3
+    },
+    {
+      "name": "void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x64_32x4_nn_align8>(cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x64_32x4_nn_align8::Params)",
+      "bucket": "matmul",
+      "calls_per_step": 1.0,
+      "ms_per_step": 1.3025,
+      "pct": 1.7
+    },
+    {
+      "name": "void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_128x128_32x5_tn_align8>(cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_128x128_32x5_tn_align8::Params)",
+      "bucket": "matmul",
+      "calls_per_step": 24.0,
+      "ms_per_step": 1.2364,
+      "pct": 1.61
+    },
+    {
+      "name": "void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_128x128_32x5_nn_align8>(cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_128x128_32x5_nn_align8::Params)",
+      "bucket": "matmul",
+      "calls_per_step": 24.0,
+      "ms_per_step": 1.2363,
+      "pct": 1.61
+    },
+    {
+      "name": "void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x128_32x3_nt_align8>(cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x128_32x3_nt_align8::Params)",
+      "bucket": "matmul",
+      "calls_per_step": 1.0,
+      "ms_per_step": 1.2067,
+      "pct": 1.58
+    },
+    {
+      "name": "triton_poi_fused__unsafe_view_mul_silu_silu_backward_view_6",
+      "bucket": "elementwise and other",
+      "calls_per_step": 24.0,
+      "ms_per_step": 1.1663,
+      "pct": 1.52
+    },
+    {
+      "name": "triton_poi_fused__to_copy_t_5",
+      "bucket": "memory copies",
+      "calls_per_step": 72.0,
+      "ms_per_step": 0.781,
+      "pct": 1.02
+    },
+    {
+      "name": "triton_per_fused__to_copy__unsafe_view_add_mean_mul_pow_rsqrt_8",
+      "bucket": "memory copies",
+      "calls_per_step": 46.0,
+      "ms_per_step": 0.7403,
+      "pct": 0.97
+    },
+    {
+      "name": "triton_per_fused__to_copy_add_div_expand_mul_pow_sum_view_13",
+      "bucket": "memory copies",
+      "calls_per_step": 23.0,
+      "ms_per_step": 0.6214,
+      "pct": 0.81
+    },
+    {
+      "name": "triton_per_fused__to_copy_add_div_expand_mul_pow_sum_view_8",
+      "bucket": "memory copies",
+      "calls_per_step": 23.0,
+      "ms_per_step": 0.588,
+      "pct": 0.77
+    },
+    {
+      "name": "triton_poi_fused__unsafe_view_mul_silu_6",
+      "bucket": "elementwise and other",
+      "calls_per_step": 24.0,
+      "ms_per_step": 0.5729,
+      "pct": 0.75
+    },
+    {
+      "name": "triton_red_fused__to_copy_mul_sum_view_2",
+      "bucket": "memory copies",
+      "calls_per_step": 24.0,
+      "ms_per_step": 0.5195,
+      "pct": 0.68
+    },
+    {
+      "name": "triton_poi_fused__to_copy_5",
+      "bucket": "memory copies",
+      "calls_per_step": 72.0,
+      "ms_per_step": 0.4473,
+      "pct": 0.58
+    },
+    {
+      "name": "triton_red_fused__log_softmax__log_softmax_backward_data__to_copy__unsafe_view_arange_eq_expand_nll_loss_backward_nll_loss_forward_scalar_tensor_view_where_0",
+      "bucket": "memory copies",
+      "calls_per_step": 1.0,
+      "ms_per_step": 0.4355,
+      "pct": 0.57
+    },
+    {
+      "name": "triton_poi_fused__to_copy_add_cat_clone_mul_neg_permute_select_backward_slice_11",
+      "bucket": "memory copies",
+      "calls_per_step": 24.0,
+      "ms_per_step": 0.3571,
+      "pct": 0.47
+    },
+    {
+      "name": "triton_red_fused__to_copy_add_mul_sum_view_7",
+      "bucket": "memory copies",
+      "calls_per_step": 23.0,
+      "ms_per_step": 0.3336,
+      "pct": 0.44
+    },
+    {
+      "name": "triton_poi_fused__to_copy_t_1",
+      "bucket": "memory copies",
+      "calls_per_step": 24.0,
+      "ms_per_step": 0.2542,
+      "pct": 0.33
+    },
+    {
+      "name": "void pytorch_flash::flash_bwd_dot_do_o_kernel<true, Flash_bwd_kernel_traits<64, 64, 128, 8, 2, 4, 4, true, false, cutlass::bfloat16_t, Flash_kernel_traits<64, 64, 128, 8, cutlass::bfloat16_t> > >(pytorch_flash::Flash_bwd_params)",
+      "bucket": "attention",
+      "calls_per_step": 24.0,
+      "ms_per_step": 0.1854,
+      "pct": 0.24
+    },
+    {
+      "name": "triton_poi_fused__to_copy_add_cat_mul_neg_slice_10",
+      "bucket": "memory copies",
+      "calls_per_step": 24.0,
+      "ms_per_step": 0.1788,
+      "pct": 0.23
+    },
+    {
+      "name": "triton_poi_fused__to_copy__unsafe_view_add_cat_mul_neg_permute_select_split_view_2",
+      "bucket": "memory copies",
+      "calls_per_step": 24.0,
+      "ms_per_step": 0.1701,
+      "pct": 0.22
+    },
+    {
+      "name": "triton_red_fused__log_softmax__to_copy__unsafe_view_prepare_softmax_online_view_10",
+      "bucket": "memory copies",
+      "calls_per_step": 1.0,
+      "ms_per_step": 0.1413,
+      "pct": 0.18
+    },
+    {
+      "name": "void pytorch_flash::flash_bwd_convert_dq_kernel<Flash_bwd_kernel_traits<64, 64, 128, 8, 2, 4, 4, true, false, cutlass::bfloat16_t, Flash_kernel_traits<64, 64, 128, 8, cutlass::bfloat16_t> > >(pytorch_flash::Flash_bwd_params, int)",
+      "bucket": "attention",
+      "calls_per_step": 24.0,
+      "ms_per_step": 0.1214,
+      "pct": 0.16
+    },
+    {
+      "name": "triton_poi_fused__to_copy_t_9",
+      "bucket": "memory copies",
+      "calls_per_step": 1.0,
+      "ms_per_step": 0.1196,
+      "pct": 0.16
+    },
+    {
+      "name": "triton_poi_fused__to_copy_12",
+      "bucket": "memory copies",
+      "calls_per_step": 24.0,
+      "ms_per_step": 0.1155,
+      "pct": 0.15
+    },
+    {
+      "name": "void cublasLt::splitKreduce_kernel<32, 16, int, __nv_bfloat16, __nv_bfloat16, float, __nv_bfloat16, false, __nv_bfloat16, __nv_bfloat16, __nv_bfloat16, true, false, false>(cublasLt::cublasSplitKParams<float>, __nv_bfloat16 const*, __nv_bfloat16 const*, __nv_bfloat16*, __nv_bfloat16*, float const*, float const*, __nv_bfloat16 const*, __nv_bfloat16 const*, __nv_bfloat16*, void*, long, float*, int*, float*, float*, float const*, float const*, float const*, float const*, float const*)",
+      "bucket": "matmul",
+      "calls_per_step": 24.0,
+      "ms_per_step": 0.1058,
+      "pct": 0.14
+    },
+    {
+      "name": "triton_poi_fused__to_copy_1",
+      "bucket": "memory copies",
+      "calls_per_step": 1.0,
+      "ms_per_step": 0.0971,
+      "pct": 0.13
+    },
+    {
+      "name": "triton_poi_fused__to_copy_t_3",
+      "bucket": "memory copies",
+      "calls_per_step": 24.0,
+      "ms_per_step": 0.0956,
+      "pct": 0.12
+    },
+    {
+      "name": "triton_per_fused__to_copy_mul_sum_view_3",
+      "bucket": "memory copies",
+      "calls_per_step": 49.0,
+      "ms_per_step": 0.0877,
+      "pct": 0.11
+    },
+    {
+      "name": "triton_poi_fused_embedding_dense_backward_16",
+      "bucket": "elementwise and other",
+      "calls_per_step": 1.0,
+      "ms_per_step": 0.0625,
+      "pct": 0.08
+    },
+    {
+      "name": "triton_poi_fused__to_copy_9",
+      "bucket": "memory copies",
+      "calls_per_step": 24.0,
+      "ms_per_step": 0.0483,
+      "pct": 0.06
+    },
+    {
+      "name": "triton_per_fused__to_copy_add_div_embedding_dense_backward_expand_mul_nll_loss_forward_pow_sum_view_17",
+      "bucket": "memory copies",
+      "calls_per_step": 1.0,
+      "ms_per_step": 0.0481,
+      "pct": 0.06
+    },
+    {
+      "name": "triton_per_fused__to_copy__unsafe_view_add_div_expand_mul_pow_sum_view_14",
+      "bucket": "memory copies",
+      "calls_per_step": 1.0,
+      "ms_per_step": 0.031,
+      "pct": 0.04
+    },
+    {
+      "name": "triton_red_fused__to_copy__unsafe_view_add_mul_sum_view_15",
+      "bucket": "memory copies",
+      "calls_per_step": 1.0,
+      "ms_per_step": 0.0278,
+      "pct": 0.04
+    },
+    {
+      "name": "triton_per_fused__to_copy__unsafe_view_add_mean_mul_pow_rsqrt_7",
+      "bucket": "memory copies",
+      "calls_per_step": 1.0,
+      "ms_per_step": 0.0211,
+      "pct": 0.03
+    },
+    {
+      "name": "triton_per_fused__to_copy_add_div_expand_mul_pow_sum_view_4",
+      "bucket": "memory copies",
+      "calls_per_step": 1.0,
+      "ms_per_step": 0.0207,
+      "pct": 0.03
+    },
+    {
+      "name": "triton_per_fused__to_copy_add_embedding_mean_mul_pow_rsqrt_0",
+      "bucket": "memory copies",
+      "calls_per_step": 1.0,
+      "ms_per_step": 0.0203,
+      "pct": 0.03
+    },
+    {
+      "name": "triton_red_fused__log_softmax__to_copy__unsafe_view_nll_loss_forward_sub_view_11",
+      "bucket": "memory copies",
+      "calls_per_step": 1.0,
+      "ms_per_step": 0.012,
+      "pct": 0.02
+    },
+    {
+      "name": "triton_per_fused__to_copy__unsafe_view_add_mean_mul_pow_rsqrt_4",
+      "bucket": "memory copies",
+      "calls_per_step": 1.0,
+      "ms_per_step": 0.0096,
+      "pct": 0.01
+    },
+    {
+      "name": "void at::native::(anonymous namespace)::multi_tensor_apply_kernel<at::native::(anonymous namespace)::TensorListMetadata<1>, at::native::(anonymous namespace)::BinaryOpScalarFunctor<float, 1, 1, 0>, std::plus<float>, float>(at::native::(anonymous namespace)::TensorListMetadata<1>, at::native::(anonymous namespace)::BinaryOpScalarFunctor<float, 1, 1, 0>, std::plus<float>, float)",
+      "bucket": "optimizer",
+      "calls_per_step": 2.0,
+      "ms_per_step": 0.0023,
+      "pct": 0.0
+    },
+    {
+      "name": "void at::native::vectorized_elementwise_kernel<4, at::native::FillFunctor<float>, std::array<char*, 1ul> >(int, at::native::FillFunctor<float>, std::array<char*, 1ul>)",
+      "bucket": "elementwise and other",
+      "calls_per_step": 1.0,
+      "ms_per_step": 0.0008,
+      "pct": 0.0
+    },
+    {
+      "name": "Memset (Device)",
+      "bucket": "memory copies",
+      "calls_per_step": 1.0,
+      "ms_per_step": 0.0006,
+      "pct": 0.0
+    }
+  ],
+  "chrome_trace": "profiles/profile_final_sm_120_medium_b4_s1024_bf16_sdpa_fusedadam_compile_torch.json"
+}
