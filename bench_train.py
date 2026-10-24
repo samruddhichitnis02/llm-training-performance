@@ -29,6 +29,14 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.checkpoint import checkpoint
 
+
+def make_linear(in_features, out_features, fmt="bf16"):
+    """bias free nn.Linear, or the fp8 / NVFP4 version from kernels/lowp.py (imported lazily)."""
+    if fmt in (None, "bf16"):
+        return nn.Linear(in_features, out_features, bias=False)
+    from kernels.lowp import LowPrecisionLinear
+    return LowPrecisionLinear(in_features, out_features, fmt)
+
 ROOT = Path(__file__).resolve().parent
 RESULTS = ROOT / "results"
 VOCAB = 32000
@@ -106,12 +114,12 @@ class RMSNorm(nn.Module):
 
 
 class Attention(nn.Module):
-    def __init__(self, cfg, attn_impl):
+    def __init__(self, cfg, attn_impl, linear="bf16"):
         super().__init__()
         self.cfg = cfg
         self.attn_impl = attn_impl
-        self.qkv = nn.Linear(cfg.d, 3 * cfg.d, bias=False)   # packed layout (3, H, hd)
-        self.wo = nn.Linear(cfg.d, cfg.d, bias=False)
+        self.qkv = make_linear(cfg.d, 3 * cfg.d, linear)   # packed layout (3, H, hd)
+        self.wo = make_linear(cfg.d, cfg.d, linear)
         self._mask = None
 
     def _causal_mask(self, T, device):
@@ -143,11 +151,11 @@ class Attention(nn.Module):
 
 
 class MLP(nn.Module):
-    def __init__(self, cfg):
+    def __init__(self, cfg, linear="bf16"):
         super().__init__()
-        self.w1 = nn.Linear(cfg.d, cfg.ffn, bias=False)
-        self.w3 = nn.Linear(cfg.d, cfg.ffn, bias=False)
-        self.w2 = nn.Linear(cfg.ffn, cfg.d, bias=False)
+        self.w1 = make_linear(cfg.d, cfg.ffn, linear)
+        self.w3 = make_linear(cfg.d, cfg.ffn, linear)
+        self.w2 = make_linear(cfg.ffn, cfg.d, linear)
 
     def forward(self, x, ops=None):
         if ops is not None:
@@ -156,13 +164,13 @@ class MLP(nn.Module):
 
 
 class Block(nn.Module):
-    def __init__(self, cfg, attn_impl, ops):
+    def __init__(self, cfg, attn_impl, ops, linear="bf16"):
         super().__init__()
         self.ops = ops
         self.norm1 = RMSNorm(cfg.d, cfg.eps)
-        self.attn = Attention(cfg, attn_impl)
+        self.attn = Attention(cfg, attn_impl, linear)
         self.norm2 = RMSNorm(cfg.d, cfg.eps)
-        self.mlp = MLP(cfg)
+        self.mlp = MLP(cfg, linear)
 
     def forward(self, x, cos, sin):
         ops = self.ops
@@ -177,14 +185,16 @@ class Block(nn.Module):
 
 
 class LlamaModel(nn.Module):
-    def __init__(self, cfg, max_seq, attn_impl="sdpa", ops=None, ckpt=False, nvtx=False):
+    def __init__(self, cfg, max_seq, attn_impl="sdpa", ops=None, ckpt=False, nvtx=False, linear="bf16"):
         super().__init__()
         self.cfg = cfg
         self.ops = ops
         self.ckpt = ckpt
         self.nvtx = nvtx
         self.emb = nn.Embedding(cfg.vocab, cfg.d)
-        self.blocks = nn.ModuleList([Block(cfg, attn_impl, ops) for _ in range(cfg.L)])
+        # linear = bf16 | fp8 | fp4 sets the precision of the block GEMMs (qkv, wo, w1, w2, w3).
+        # The lm head stays bf16, as low precision training recipes keep the last layer wider.
+        self.blocks = nn.ModuleList([Block(cfg, attn_impl, ops, linear) for _ in range(cfg.L)])
         self.norm_f = RMSNorm(cfg.d, cfg.eps)
         self.head = nn.Linear(cfg.d, cfg.vocab, bias=False)   # untied from emb
         cos, sin = rope_tables(max_seq, cfg.hd, cfg.rope_base, device="cpu")
@@ -218,8 +228,41 @@ class LlamaModel(nn.Module):
         return self.ops.fused_linear_cross_entropy(h.view(B * T, -1), self.head.weight, targets.reshape(-1))
 
 
-def load_ops(kernels):
-    """Import the fused kernels lazily so the torch baseline works without them."""
+FUSED_OPS = ("rmsnorm", "add_rmsnorm", "swiglu", "rope_qkv", "fused_linear_cross_entropy")
+
+
+# PyTorch versions with the same signatures as the fused kernels. Used for the ops that
+# are switched off in an ablation (--fused-ops), so each kernel's gain can be measured alone.
+def _torch_rmsnorm(x, w, eps=1e-5, out_dtype=None):
+    xf = x.float()
+    y = xf * torch.rsqrt(xf.pow(2).mean(-1, keepdim=True) + eps) * w
+    return y.to(out_dtype or x.dtype)
+
+
+def _torch_add_rmsnorm(a, r, w, eps=1e-5, out_dtype=None):
+    s = r + a
+    return _torch_rmsnorm(s, w, eps, out_dtype or a.dtype), s
+
+
+def _torch_swiglu(a, b):
+    return F.silu(a) * b
+
+
+def _torch_rope_qkv(qkv, cos, sin, H):
+    B, T, C3 = qkv.shape
+    q, k, v = qkv.view(B, T, 3, H, C3 // (3 * H)).permute(2, 0, 3, 1, 4)
+    return apply_rope(q, cos, sin), apply_rope(k, cos, sin), v
+
+
+def _torch_linear_ce(h, W, targets):
+    return F.cross_entropy(F.linear(h, W).float(), targets)
+
+
+def load_ops(kernels, fused_ops=None):
+    """Import the fused kernels lazily so the torch baseline works without them.
+
+    fused_ops: optional subset of FUSED_OPS to use; the rest fall back to PyTorch code.
+    """
     if kernels == "torch":
         return None
     from kernels import triton_ops as t
@@ -235,6 +278,12 @@ def load_ops(kernels):
         ops.add_rmsnorm = cuda_add_rmsnorm
     elif kernels != "triton":
         raise ValueError(f"unknown kernels mode {kernels}")
+    if fused_ops is not None:
+        fallback = dict(rmsnorm=_torch_rmsnorm, add_rmsnorm=_torch_add_rmsnorm, swiglu=_torch_swiglu,
+                        rope_qkv=_torch_rope_qkv, fused_linear_cross_entropy=_torch_linear_ce)
+        for name in FUSED_OPS:
+            if name not in fused_ops:
+                setattr(ops, name, fallback[name])
     return ops
 
 
@@ -408,9 +457,10 @@ def make_batch(B, T, vocab, device):
 
 def build(cfg, run, device="cuda"):
     """Model, optimizer and a step function for one configuration."""
-    ops = load_ops(run["kernels"])
+    ops = load_ops(run["kernels"], run.get("fused_ops"))
     torch.manual_seed(run.get("seed", 0))   # same initial weights for every row, so losses compare
-    model = LlamaModel(cfg, run["seq"], run["attn"], ops, run["ckpt"], run["nvtx"] and not run["compile"]).to(device)
+    model = LlamaModel(cfg, run["seq"], run["attn"], ops, run["ckpt"], run["nvtx"] and not run["compile"],
+                       linear=run.get("linear", "bf16")).to(device)
     model.train()
     # Non-fused rows use the multi tensor (foreach) Adam, set explicitly. With only fused=False this
     # PyTorch build ran the per parameter loop instead (checked with the profiler), a much slower baseline.
@@ -451,11 +501,22 @@ def cleanup():
         pass
 
 
+def cap_gpu_memory(fraction=0.97):
+    """Make PyTorch raise OutOfMemoryError before the card is full.
+
+    On Windows and WSL2 the GPU driver can spill device memory into system RAM instead of
+    failing. A run that does not fit then gets 10x to 100x slower rather than erroring
+    (seen here: medium at batch 16 without checkpointing took 4.3 s per step at 33.5 GB).
+    With this cap such a row is recorded as oom."""
+    torch.cuda.set_per_process_memory_fraction(fraction)
+
+
 def run_one(cfg, run, warmup, steps, bf16_ref, peak_spec):
     """Benchmark one configuration. Never raises: oom and errors are recorded in the row."""
     row = {"name": run.get("name", "run"), "config": {k: v for k, v in run.items() if k != "name"}}
     model = opt = step = None
     try:
+        cap_gpu_memory()
         cleanup()
         torch.cuda.reset_peak_memory_stats()
         model, opt, step = build(cfg, run)
@@ -519,6 +580,11 @@ LADDER = [
     ("5 + torch.compile", dict(precision="bf16", attn="sdpa", fused_adam=True, compile=True, kernels="torch")),
     ("6 fused Triton kernels", dict(precision="bf16", attn="sdpa", fused_adam=True, compile=False, kernels="triton")),
     ("7 CUDA C++ add+RMSNorm", dict(precision="bf16", attn="sdpa", fused_adam=True, compile=False, kernels="cuda")),
+    # Low precision rows: row 6 with the block GEMMs (qkv, wo, w1, w2, w3) in fp8 or NVFP4.
+    ("8 + FP8 linears (e4m3)", dict(precision="bf16", attn="sdpa", fused_adam=True, compile=False, kernels="triton",
+                                    linear="fp8")),
+    ("9 + NVFP4 linears (e2m1)", dict(precision="bf16", attn="sdpa", fused_adam=True, compile=False, kernels="triton",
+                                      linear="fp4")),
 ]
 
 
@@ -546,6 +612,11 @@ def main():
     p.add_argument("--fused-adam", action="store_true")
     p.add_argument("--ckpt", action="store_true", help="activation checkpointing per block")
     p.add_argument("--kernels", default="torch", choices=["torch", "triton", "cuda"])
+    p.add_argument("--fused-ops", default=None,
+                   help="comma list of fused ops to use with --kernels triton|cuda, rest in PyTorch: "
+                        + ",".join(FUSED_OPS) + " (or 'none')")
+    p.add_argument("--linear", default="bf16", choices=["bf16", "fp8", "fp4"],
+                   help="precision of the block GEMMs (fp8 needs sm_89+, fp4 needs Blackwell)")
     p.add_argument("--nvtx", action="store_true", help="named NVTX ranges for Nsight Systems")
     p.add_argument("--warmup", type=int, default=5)
     p.add_argument("--steps", type=int, default=20)
@@ -580,11 +651,20 @@ def main():
     if args.sweep:
         runs = [dict(name=name, **base, **cfg_row) for name, cfg_row in LADDER]
     else:
+        fused_ops = None
+        if args.fused_ops is not None:
+            fused_ops = [] if args.fused_ops == "none" else args.fused_ops.split(",")
+            unknown = set(fused_ops) - set(FUSED_OPS)
+            if unknown:
+                sys.exit(f"unknown fused ops: {sorted(unknown)}")
         name = (f"{args.precision} {args.attn}" + (" fusedadam" if args.fused_adam else "")
                 + (" compile" if args.compile else "") + (" ckpt" if args.ckpt else "")
-                + (f" kernels={args.kernels}" if args.kernels != "torch" else ""))
+                + (f" kernels={args.kernels}" if args.kernels != "torch" else "")
+                + (f" ops={args.fused_ops}" if fused_ops is not None else "")
+                + (f" linear={args.linear}" if args.linear != "bf16" else ""))
         runs = [dict(name=name, **base, precision=args.precision, attn=args.attn,
-                     fused_adam=args.fused_adam, compile=args.compile, kernels=args.kernels)]
+                     fused_adam=args.fused_adam, compile=args.compile, kernels=args.kernels,
+                     fused_ops=fused_ops, linear=args.linear)]
 
     rows = []
     for run in runs:

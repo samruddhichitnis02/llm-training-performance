@@ -1,0 +1,34 @@
+sm_120 (final) | medium: 374M params, batch 4, seq 1024
+bf16 matmul peak reached this run (MFU reference): 215.7 TFLOPs
+running: 1 fp32 baseline, naive attn ...
+  333.97 ms/step, 12,265 tok/s, MFU 13.4%, 21.16 GB, loss 5.5768
+running: 2 bf16 autocast ...
+  236.37 ms/step, 17,329 tok/s, MFU 18.9%, 21.62 GB, loss 5.0746
+running: 3 + fused attention (SDPA) ...
+  121.81 ms/step, 33,625 tok/s, MFU 36.6%, 12.36 GB, loss 5.1239
+running: 4 + fused Adam ...
+  107.5 ms/step, 38,104 tok/s, MFU 41.5%, 12.36 GB, loss 5.1918
+running: 5 + torch.compile ...
+  83.51 ms/step, 49,050 tok/s, MFU 53.4%, 9.74 GB, loss 5.0809
+running: 6 fused Triton kernels ...
+  84.7 ms/step, 48,360 tok/s, MFU 52.7%, 9.62 GB, loss 5.3303
+running: 7 CUDA C++ add+RMSNorm ...
+  84.58 ms/step, 48,430 tok/s, MFU 52.7%, 9.62 GB, loss 5.1313
+running: 8 + FP8 linears (e4m3) ...
+  71.4 ms/step, 57,365 tok/s, MFU 62.5%, 8.85 GB, loss 4.4192
+running: 9 + NVFP4 linears (e2m1) ...
+  84.66 ms/step, 48,383 tok/s, MFU 52.7%, 8.26 GB, loss 5.399
+
+row                            ms/step    tok/s    speedup    TFLOPs  MFU      peak GB    loss  finite
+---------------------------  ---------  -------  ---------  --------  -----  ---------  ------  --------
+1 fp32 baseline, naive attn     333.97   12,265       1        28.8   13.4%      21.16  5.5768  yes
+2 bf16 autocast                 236.37   17,329       1.41     40.7   18.9%      21.62  5.0746  yes
+3 + fused attention (SDPA)      121.81   33,625       2.74     78.97  36.6%      12.36  5.1239  yes
+4 + fused Adam                  107.5    38,104       3.11     89.49  41.5%      12.36  5.1918  yes
+5 + torch.compile                83.51   49,050       4       115.2   53.4%       9.74  5.0809  yes
+6 fused Triton kernels           84.7    48,360       3.94    113.58  52.7%       9.62  5.3303  yes
+7 CUDA C++ add+RMSNorm           84.58   48,430       3.95    113.74  52.7%       9.62  5.1313  yes
+8 + FP8 linears (e4m3)           71.4    57,365       4.68    134.73  62.5%       8.85  4.4192  yes
+9 + NVFP4 linears (e2m1)         84.66   48,383       3.94    113.63  52.7%       8.26  5.399   yes
+
+Saved results/milestones/m5_sweep_final_sm_120_medium_b4_s1024.json

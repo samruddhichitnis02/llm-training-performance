@@ -1,0 +1,53 @@
+{
+  "arch": "sm_120",
+  "machine_label": "final",
+  "torch": "2.11.0+cu128",
+  "cuda": "12.8",
+  "os": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "python": "3.12.3",
+  "gpu_count": 1,
+  "sm_count": 170,
+  "gpu_mem_gb": 34.2,
+  "time": "2026-10-23 20:30:34",
+  "size": "medium",
+  "model": {
+    "d": 1024,
+    "L": 24,
+    "H": 16,
+    "ffn": 2816,
+    "vocab": 32000,
+    "eps": 1e-05,
+    "rope_base": 10000.0
+  },
+  "params_total": 373867520,
+  "params_matmul": 341099520,
+  "flops_per_token": 2348587008,
+  "batch": 32,
+  "seq": 1024,
+  "warmup": 5,
+  "steps": 20,
+  "bf16_ref_tflops": 227.1,
+  "peak_tflops_spec": null,
+  "sweep": false,
+  "rows": [
+    {
+      "name": "bf16 sdpa fusedadam",
+      "config": {
+        "size": "medium",
+        "batch": 32,
+        "seq": 1024,
+        "ckpt": false,
+        "nvtx": false,
+        "lr": 0.0003,
+        "precision": "bf16",
+        "attn": "sdpa",
+        "fused_adam": true,
+        "compile": false,
+        "kernels": "torch",
+        "fused_ops": null,
+        "linear": "bf16"
+      },
+      "status": "oom"
+    }
+  ]
+}

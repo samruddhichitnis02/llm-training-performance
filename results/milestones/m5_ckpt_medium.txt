@@ -1,0 +1,8 @@
+batch 4 no-ckpt:   98.71 ms/step, 41,495 tok/s, MFU 41.0%, 12.37 GB, loss 4.6942
+batch 4 --ckpt:   127.11 ms/step, 32,224 tok/s, MFU 33.0%, 7.13 GB, loss 5.4248
+batch 8 no-ckpt:   187.84 ms/step, 43,612 tok/s, MFU 44.8%, 19.42 GB, loss 3.489
+batch 8 --ckpt:   229.09 ms/step, 35,759 tok/s, MFU 36.8%, 8.83 GB, loss 3.4742
+batch 16 no-ckpt:   oom 
+batch 16 --ckpt:   479.56 ms/step, 34,165 tok/s, MFU 35.3%, 12.73 GB, loss 2.1598
+batch 32 no-ckpt:   oom 
+batch 32 --ckpt:   958.77 ms/step, 34,177 tok/s, MFU 35.5%, 20.79 GB, loss 1.8019

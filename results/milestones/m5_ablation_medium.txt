@@ -1,0 +1,21 @@
+sm_120 (final) | medium batch 4 seq 1024
+  none (all ops in PyTorch)                  102.68 ms   12.37 GB
+  only rmsnorm                                97.81 ms   11.95 GB
+  only add_rmsnorm                            97.46 ms   11.97 GB
+  only swiglu                                101.71 ms   11.81 GB
+  only rope_qkv                               94.77 ms   12.17 GB
+  only fused_linear_cross_entropy            100.20 ms   11.20 GB
+  all five                                    80.51 ms    9.63 GB
+
+config                             ms/step    saved ms  saved      peak GB    GB saved
+-------------------------------  ---------  ----------  -------  ---------  ----------
+none (all ops in PyTorch)           102.68        0     0.0%         12.37        0
+only rmsnorm                         97.81        4.87  4.74%        11.95        0.42
+only add_rmsnorm                     97.46        5.22  5.08%        11.97        0.4
+only swiglu                         101.71        0.97  0.94%        11.81        0.56
+only rope_qkv                        94.77        7.91  7.7%         12.17        0.2
+only fused_linear_cross_entropy     100.2         2.48  2.42%        11.2         1.17
+all five                             80.51       22.17  21.59%        9.63        2.74
+
+sum of single kernel savings: 21.45 ms, all five together: 22.17 ms
+Saved ablation_kernels_final_sm_120_medium_b4_s1024.json

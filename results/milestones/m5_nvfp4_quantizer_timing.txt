@@ -1,0 +1,6 @@
+amax pass (Triton, int atomic): 39.8 us
+amax pass (torch abs().amax()): 50.1 us
+quantize transpose=0 stochastic=0:   47.7 us    604 GB/s
+quantize transpose=0 stochastic=1:   56.6 us    510 GB/s
+quantize transpose=1 stochastic=0:   38.0 us    759 GB/s
+quantize transpose=1 stochastic=1:   56.2 us    513 GB/s

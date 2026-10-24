@@ -225,3 +225,87 @@ nsys profile -t cuda,nvtx -o profiles/nsys_medium_triton --force-overwrite true 
 The `.nsys-rep` file is in `profiles/` (not committed). The summaries are committed as `milestones/m4_nsys_nvtx_sum.csv` and `milestones/m4_nsys_cuda_gpu_kern_sum.csv`.
 
 From the NVTX summary: each timed step range lasts about 31.5 ms on the CPU, while the step takes 81 ms on the GPU. The CPU finishes queueing all the work for a step in well under half the GPU time, so this config is GPU bound and launch overhead is hidden. The first warmup step takes 454 ms (Triton compiling and autotuning the kernels, and cuBLAS choosing its kernels), which is why warmup steps are excluded from timing.
+
+## Milestone 5: optimization notes, FP8 and NVFP4 training
+
+Code: `kernels/lowp.py` (FP8 and NVFP4 linear layers, NVFP4 Triton quantizer), `kernels/test_lowp.py`, `kernels/ablate_kernels.py`, `--linear bf16|fp8|fp4` and `--fused-ops` in `bench_train.py`, `--linear` in `profile_step.py`, a GPU memory cap in all benchmark scripts. One note per optimization in `optimizations/`. Console output of every run is in `milestones/m5_*.txt`.
+
+### Tests
+
+- `milestones/m5_test_kernels.txt`: 142 of 142 (unchanged kernels, rerun).
+- `milestones/m5_test_lowp.txt`: 22 of 22. NVFP4 GEMM matches a float32 matmul of the dequantized operands to 3e-7; the Triton quantizer gives bit identical output to the PyTorch reference; stochastic rounding is unbiased.
+
+### Ladder, all 9 rows
+
+Sources: `milestones/m5_sweep_final_sm_120_small_b8_s1024.json`, `milestones/m5_sweep_final_sm_120_medium_b4_s1024.json`. Every row in this run is about 4% slower than in milestone 4, and the bf16 reference matmul was also lower (219.2 and 215.7 against 226.8 TFLOPs), so the GPU ran at lower clocks during this session. Gains between rows match milestone 4.
+
+| Row | small ms | Speedup | MFU | GB | medium ms | Speedup | MFU | GB |
+|---|---|---|---|---|---|---|---|---|
+| 1 fp32 baseline, naive attention | 233.85 | 1.00 | 12.3% | 15.94 | 333.97 | 1.00 | 13.4% | 21.16 |
+| 2 bf16 autocast | 164.34 | 1.42 | 17.5% | 16.06 | 236.37 | 1.41 | 18.9% | 21.62 |
+| 3 + fused attention (SDPA) | 76.85 | 3.04 | 37.5% | 9.10 | 121.81 | 2.74 | 36.6% | 12.36 |
+| 4 + fused Adam | 71.61 | 3.27 | 40.2% | 9.10 | 107.50 | 3.11 | 41.5% | 12.36 |
+| 5 + torch.compile | 50.23 | 4.66 | 57.3% | 5.49 | 83.51 | 4.00 | 53.4% | 9.74 |
+| 6 fused Triton kernels | 50.55 | 4.63 | 57.0% | 5.15 | 84.70 | 3.94 | 52.7% | 9.62 |
+| 7 CUDA C++ add+RMSNorm | 50.52 | 4.63 | 57.0% | 5.15 | 84.58 | 3.95 | 52.7% | 9.62 |
+| 8 + FP8 linears (e4m3) | 44.67 | 5.24 | 64.5% | 4.73 | 71.40 | 4.68 | 62.5% | 8.85 |
+| 9 + NVFP4 linears (e2m1) | 50.76 | 4.61 | 56.7% | 4.41 | 84.66 | 3.94 | 52.7% | 8.26 |
+
+Best row: 8 (FP8), 5.24x faster than the fp32 baseline on `small`, 4.68x on `medium`. All losses finite. MFU uses the bf16 peak for every row.
+
+### Each Triton kernel alone
+
+Source: `ablation_kernels_final_sm_120_medium_b4_s1024.json`. `medium`, batch 4, seq 1024, fused Adam. Every row uses the fused model structure; "none" runs every op in PyTorch.
+
+| Config | ms/step | Saved | Peak GB saved |
+|---|---|---|---|
+| none | 102.68 | | |
+| only rmsnorm | 97.81 | 4.87 ms (4.7%) | 0.42 |
+| only add_rmsnorm | 97.46 | 5.22 ms (5.1%) | 0.40 |
+| only swiglu | 101.71 | 0.97 ms (0.9%) | 0.56 |
+| only rope_qkv | 94.77 | 7.91 ms (7.7%) | 0.20 |
+| only linear + cross entropy | 100.20 | 2.48 ms (2.4%) | 1.17 |
+| all five | 80.51 | 22.17 ms (21.6%) | 2.74 |
+
+The single kernel savings sum to 21.45 ms, close to the 22.17 ms of all five together.
+
+### Activation checkpointing
+
+Source: `milestones/m5_ckpt_medium_*.json`, `milestones/m5_ckpt_medium.txt`. `medium`, seq 1024, fused Adam.
+
+| Batch | No ckpt ms | GB | Ckpt ms | GB |
+|---|---|---|---|---|
+| 4 | 98.71 | 12.37 | 127.11 | 7.13 |
+| 8 | 187.84 | 19.42 | 229.09 | 8.83 |
+| 16 | oom | | 479.56 | 12.73 |
+| 32 | oom | | 958.77 | 20.79 |
+
+Checkpointing saves 42 to 55% of memory and costs 22 to 29% time. It lets batch 32 fit, but does not raise throughput here: 34,177 tokens/s at best with checkpointing, against 43,612 without.
+
+Spill found during these runs: the first attempt at batch 16 without checkpointing did not error. The Windows GPU driver spilled into system RAM and the step took 4,328 ms at 33.5 GB. All scripts now cap PyTorch at 97% of the card with `torch.cuda.set_per_process_memory_fraction`, so a row that does not fit records `oom`.
+
+### FP8 and NVFP4 training
+
+Stability (`loss_parity_final_sm_120_small_triton_triton-fp8_triton-fp4_200steps.json`, `small`, batch 8, 200 steps, same initial weights):
+
+| | bf16 | FP8 | NVFP4 |
+|---|---|---|---|
+| steps to loss below 1.0 | 32 | 33 | 36 |
+| final loss (step 199) | 0.0005 | 0.0005 | 0.0006 |
+| largest loss gap / initial loss | | 0.7% | 6.4% |
+
+The parity metric changed in this milestone. The old one (largest relative difference per step) blows up as the loss nears zero: 0.0006 against 0.0005 counts as 20%. It is now the largest absolute gap divided by the starting loss, plus the steps each run needs to pass loss 1.0. The kernel parity run was repeated with the new metric (`loss_parity_final_sm_120_small_torch_triton_cuda_20steps.json`): 1.4%, PASS.
+
+Profile (`profile_final_sm_120_medium_b4_s1024_bf16_sdpa_fusedadam_triton_fp8.json` and `..._fp4.json`):
+
+| | bf16 | FP8 | NVFP4 |
+|---|---|---|---|
+| block GEMMs, GPU ms | about 51 | about 21 (2.4x) | about 9 (5.6x) |
+| quantization, GPU ms | | about 5 | 18.3 |
+| launches per step | 1177 | 1993 | 4033 |
+| GPU busy of clean step | 77 of 81 ms | 50 of 73 ms | 56 of 89 ms |
+| GPU idle | 5.7% | 31% | 37% |
+
+The NVFP4 block GEMMs are 5.6x faster than bf16 inside the real step, matching the 5.7x from calibration. The step does not get faster because quantization costs twice the FP4 GEMM time and the 4033 launches per step leave the GPU idle 37% of the time. Details and the path to a real FP4 speedup: `optimizations/09_fp8_fp4_linears.md`.
+
+NVFP4 quantizer, alone (`milestones/m5_nvfp4_quantizer_timing.txt`, a (4096, 2816) bf16 tensor): 38 to 57 us per call, 510 to 760 GB/s. The first `torch.compile` version made the `small` step 120.7 ms, 2.4x slower than bf16; the Triton kernel brought it to parity.

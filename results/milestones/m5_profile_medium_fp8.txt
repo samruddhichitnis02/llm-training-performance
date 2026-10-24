@@ -1,0 +1,33 @@
+sm_120 (final) | medium batch 4 seq 1024 | bf16 sdpa fusedadam kernels=triton linear=fp8
+clean step time (no profiler): 73.33 ms
+
+Top 12 GPU kernels (3 profiled steps)
+kernel                                                                               bucket                   calls/step    ms/step  % GPU
+-----------------------------------------------------------------------------------  ---------------------  ------------  ---------  -------
+sm89_xmma_gemm_e4m3bf16_e4m3f32_f32_tn_n_tilesize128x128x64_stage3_warpsize2x2x1...  matmul                          168      9.58   19.0%
+void at::native::(anonymous namespace)::multi_tensor_apply_kernel<at::native::(a...  optimizer                        18      7.281  14.4%
+sm89_xmma_gemm_e4m3bf16_e4m3f32_f32_tn_n_tilesize64x128x64_stage4_warpsize2x2x1_...  matmul                           72      4.172  8.3%
+sm89_xmma_gemm_e4m3f32_e4m3f32_f32_tn_n_tilesize64x64x64_stage6_warpsize2x2x1_te...  matmul                           72      3.959  7.8%
+void pytorch_flash::flash_bwd_dq_dk_dv_loop_seqk_parallel_kernel<Flash_bwd_kerne...  attention                        24      3.87   7.7%
+sm89_xmma_gemm_e4m3f32_e4m3f32_f32_tn_n_tilesize64x128x64_stage4_warpsize2x2x1_t...  matmul                           48      3.674  7.3%
+triton_poi_fused__to_copy_clamp_clamp_min_clone_mul_reciprocal_t_2                   memory copies                   360      2.987  5.9%
+triton_red_fused_abs_amax_0                                                          elementwise and other           360      1.916  3.8%
+void pytorch_flash::flash_fwd_kernel<Flash_fwd_kernel_traits<64, 128, 128, 4, fa...  attention                        24      1.764  3.5%
+void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x64_32x4_...  matmul                            2      1.462  2.9%
+void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_256x128_32x3...  matmul                            2      1.272  2.5%
+void cutlass::Kernel2<cutlass_80_tensorop_s16816gemm_bf16_256x128_32x3_nt_align8...  matmul                            2      1.26   2.5%
+
+Bucket breakdown
+bucket                   launches/step    ms/step  % GPU
+---------------------  ---------------  ---------  -------
+matmul                             366     25.38   50.3%
+attention                           96      5.935  11.8%
+optimizer                           20      7.284  14.4%
+memory copies                      686      4.027  8.0%
+elementwise and other              825      7.857  15.6%
+
+GPU kernel launches per step: 1993
+GPU busy per step: 50.48 ms of 73.33 ms clean step time
+GPU idle: 31.2%
+
+Saved results/profile_final_sm_120_medium_b4_s1024_bf16_sdpa_fusedadam_triton_fp8.json and profiles/profile_final_sm_120_medium_b4_s1024_bf16_sdpa_fusedadam_triton_fp8.json

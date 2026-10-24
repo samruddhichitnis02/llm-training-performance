@@ -31,7 +31,7 @@ import torch
 from torch.autograd import DeviceType
 from torch.profiler import ProfilerActivity, profile, schedule
 
-from bench_train import RESULTS, ROOT, SIZES, build, cleanup, env_info
+from bench_train import RESULTS, ROOT, SIZES, build, cap_gpu_memory, cleanup, env_info
 
 PROFILES = ROOT / "profiles"
 warnings.filterwarnings("ignore", message=".*Profiler clears events.*")
@@ -133,6 +133,7 @@ def main():
     p.add_argument("--fused-adam", action="store_true")
     p.add_argument("--ckpt", action="store_true")
     p.add_argument("--kernels", default="torch", choices=["torch", "triton", "cuda"])
+    p.add_argument("--linear", default="bf16", choices=["bf16", "fp8", "fp4"])
     p.add_argument("--warmup", type=int, default=5)
     p.add_argument("--steps", type=int, default=10, help="clean timed steps")
     p.add_argument("--prof-steps", type=int, default=3, help="steps recorded by the profiler")
@@ -147,12 +148,15 @@ def main():
     info = env_info(args.machine_label)
     cfg = SIZES[args.size]
     run = dict(size=args.size, batch=args.batch, seq=args.seq, precision=args.precision, attn=args.attn,
-               compile=args.compile, fused_adam=args.fused_adam, ckpt=args.ckpt, kernels=args.kernels, nvtx=False)
+               compile=args.compile, fused_adam=args.fused_adam, ckpt=args.ckpt, kernels=args.kernels, nvtx=False,
+               linear=args.linear)
     desc = (f"{args.precision} {args.attn}" + (" fusedadam" if args.fused_adam else "")
-            + (" compile" if args.compile else "") + (" ckpt" if args.ckpt else "") + f" kernels={args.kernels}")
+            + (" compile" if args.compile else "") + (" ckpt" if args.ckpt else "") + f" kernels={args.kernels}"
+            + (f" linear={args.linear}" if args.linear != "bf16" else ""))
     print(f"{info['arch']} ({args.machine_label}) | {args.size} batch {args.batch} seq {args.seq} | {desc}")
 
     cleanup()
+    cap_gpu_memory()
     model, opt, step = build(cfg, run)
 
     # 1. Clean timing, no profiler.
@@ -221,7 +225,8 @@ def main():
     # Save outputs.
     tag = args.tag or (f"{args.size}_b{args.batch}_s{args.seq}_{args.precision}_{args.attn}"
                        + ("_fusedadam" if args.fused_adam else "") + ("_compile" if args.compile else "")
-                       + ("_ckpt" if args.ckpt else "") + f"_{args.kernels}")
+                       + ("_ckpt" if args.ckpt else "") + f"_{args.kernels}"
+                       + (f"_{args.linear}" if args.linear != "bf16" else ""))
     stem = f"profile_{args.machine_label}_{info['arch']}_{tag}"
     PROFILES.mkdir(exist_ok=True)
     trace_path = PROFILES / f"{stem}.json"
