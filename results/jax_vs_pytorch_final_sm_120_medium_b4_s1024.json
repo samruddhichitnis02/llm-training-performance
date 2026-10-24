@@ -1,0 +1,281 @@
+{
+  "arch": "sm_120",
+  "machine_label": "final",
+  "torch": "2.11.0+cu128",
+  "cuda": "12.8",
+  "os": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "python": "3.12.3",
+  "gpu_count": 1,
+  "sm_count": 170,
+  "gpu_mem_gb": 34.2,
+  "time": "2026-10-23 22:15:50",
+  "size": "medium",
+  "batch": 4,
+  "seq": 1024,
+  "bf16_ref_tflops": 224.5,
+  "parity": {
+    "output": {
+      "rel_err": 0.000959073351049105,
+      "pass": true
+    },
+    "grad_x": {
+      "rel_err": 0.0014791443592274288,
+      "pass": true
+    },
+    "grad_norm1": {
+      "rel_err": 0.004404944736276076,
+      "pass": true
+    },
+    "grad_norm2": {
+      "rel_err": 0.004316010552677326,
+      "pass": true
+    },
+    "grad_qkv": {
+      "rel_err": 0.004468846969910196,
+      "pass": true
+    },
+    "grad_wo": {
+      "rel_err": 0.003694677017776598,
+      "pass": true
+    },
+    "grad_w1": {
+      "rel_err": 0.0038274115266283075,
+      "pass": true
+    },
+    "grad_w3": {
+      "rel_err": 0.003907520055661208,
+      "pass": true
+    },
+    "grad_w2": {
+      "rel_err": 0.004056068419322247,
+      "pass": true
+    }
+  },
+  "parity_pass": true,
+  "gemms": [
+    {
+      "gemm": "qkv forward",
+      "M": 4096,
+      "N": 3072,
+      "K": 1024,
+      "torch_us": 155.4,
+      "xla_us": 138.64,
+      "xla_kernel": "triton gemm fusion",
+      "torch_tflops": 165.8,
+      "xla_tflops": 185.9,
+      "xla_speedup": 1.12
+    },
+    {
+      "gemm": "wo forward",
+      "M": 4096,
+      "N": 1024,
+      "K": 1024,
+      "torch_us": 53.9,
+      "xla_us": 68.31,
+      "xla_kernel": "triton gemm fusion",
+      "torch_tflops": 159.4,
+      "xla_tflops": 125.7,
+      "xla_speedup": 0.79
+    },
+    {
+      "gemm": "w1/w3 forward",
+      "M": 4096,
+      "N": 2816,
+      "K": 1024,
+      "torch_us": 155.15,
+      "xla_us": 136.55,
+      "xla_kernel": "triton gemm fusion",
+      "torch_tflops": 152.3,
+      "xla_tflops": 173.0,
+      "xla_speedup": 1.14
+    },
+    {
+      "gemm": "w2 forward",
+      "M": 4096,
+      "N": 1024,
+      "K": 2816,
+      "torch_us": 139.0,
+      "xla_us": 137.71,
+      "xla_kernel": "triton gemm fusion",
+      "torch_tflops": 169.9,
+      "xla_tflops": 171.5,
+      "xla_speedup": 1.01
+    },
+    {
+      "gemm": "w1/w3 input gradient",
+      "M": 4096,
+      "N": 1024,
+      "K": 2816,
+      "torch_us": 138.74,
+      "xla_us": 138.09,
+      "xla_kernel": "triton gemm fusion",
+      "torch_tflops": 170.3,
+      "xla_tflops": 171.1,
+      "xla_speedup": 1.0
+    },
+    {
+      "gemm": "w1/w3 weight gradient",
+      "M": 2816,
+      "N": 1024,
+      "K": 4096,
+      "torch_us": 197.55,
+      "xla_us": 138.18,
+      "xla_kernel": "triton gemm fusion",
+      "torch_tflops": 119.6,
+      "xla_tflops": 171.0,
+      "xla_speedup": 1.43
+    },
+    {
+      "gemm": "qkv weight gradient",
+      "M": 3072,
+      "N": 1024,
+      "K": 4096,
+      "torch_us": 198.27,
+      "xla_us": 140.05,
+      "xla_kernel": "triton gemm fusion",
+      "torch_tflops": 130.0,
+      "xla_tflops": 184.0,
+      "xla_speedup": 1.42
+    },
+    {
+      "gemm": "lm head",
+      "M": 4096,
+      "N": 32000,
+      "K": 1024,
+      "torch_us": 1239.85,
+      "xla_us": 1226.18,
+      "xla_kernel": "triton gemm fusion",
+      "torch_tflops": 216.5,
+      "xla_tflops": 218.9,
+      "xla_speedup": 1.01
+    }
+  ],
+  "block_fwd_bwd_ms": {
+    "PyTorch eager": 3.919100499842898,
+    "PyTorch torch.compile": 3.2250839976768475,
+    "PyTorch Triton kernels": 3.0706630004715407,
+    "JAX jit, attention cudnn": 3.0979,
+    "JAX jit, attention xla": 4.7222
+  },
+  "step": {
+    "PyTorch eager (row 4)": {
+      "status": "ok",
+      "ms_per_step": 104.95,
+      "tokens_per_s": 39027,
+      "mfu": 0.4083,
+      "peak_mem_gb": 12.36,
+      "final_loss": 5.6173,
+      "profile": {
+        "launches_per_step": 2921.0,
+        "gpu_busy_ms": 93.399,
+        "buckets": {
+          "matmul": 55.1234,
+          "attention": 5.9723,
+          "optimizer": 7.3121,
+          "memory copies": 8.9043,
+          "elementwise and other": 16.0867
+        },
+        "source": "profile_final_sm_120_medium_b4_s1024_bf16_sdpa_fusedadam_torch.json"
+      }
+    },
+    "PyTorch torch.compile (row 5)": {
+      "status": "ok",
+      "ms_per_step": 80.67,
+      "tokens_per_s": 50775,
+      "mfu": 0.5312,
+      "peak_mem_gb": 9.75,
+      "final_loss": 5.2117,
+      "profile": {
+        "launches_per_step": 1066.0,
+        "gpu_busy_ms": 76.597,
+        "buckets": {
+          "matmul": 55.0676,
+          "attention": 6.0739,
+          "optimizer": 7.3294,
+          "memory copies": 6.3233,
+          "elementwise and other": 1.8025
+        },
+        "source": "profile_final_sm_120_medium_b4_s1024_bf16_sdpa_fusedadam_compile_torch.json"
+      }
+    },
+    "PyTorch Triton kernels (row 6)": {
+      "status": "ok",
+      "ms_per_step": 82.49,
+      "tokens_per_s": 49654,
+      "mfu": 0.5194,
+      "peak_mem_gb": 9.63,
+      "final_loss": 5.1086,
+      "profile": {
+        "launches_per_step": 1177.0,
+        "gpu_busy_ms": 76.744,
+        "buckets": {
+          "matmul": 55.3161,
+          "attention": 5.7513,
+          "optimizer": 7.3263,
+          "memory copies": 2.3886,
+          "elementwise and other": 5.9614
+        },
+        "source": "profile_final_sm_120_medium_b4_s1024_bf16_sdpa_fusedadam_triton.json"
+      }
+    },
+    "JAX jit, attention cudnn": {
+      "status": "ok",
+      "ms_per_step": 70.61,
+      "tokens_per_s": 58007,
+      "mfu": 0.5926,
+      "peak_mem_gb": 9.65,
+      "final_loss": 4.0407,
+      "profile": {
+        "launches_per_step": 1259.0,
+        "gpu_busy_ms": 66.589,
+        "buckets": {
+          "attention": 6.944,
+          "fusions and other": 14.254,
+          "matmul": 44.753,
+          "memory copies": 0.638
+        }
+      },
+      "hlo": {
+        "fusions": 1135,
+        "fusion_kinds": {
+          "Loop": 566,
+          "Input": 252,
+          "Custom": 317
+        },
+        "custom_calls": {
+          "__cudnn$fmhaSoftmax": 24,
+          "__cublas$gemm": 2,
+          "__cudnn$fmhaSoftmaxBackward": 24
+        }
+      }
+    },
+    "JAX jit, attention xla": {
+      "status": "ok",
+      "ms_per_step": 102.01,
+      "tokens_per_s": 40154,
+      "mfu": 0.4154,
+      "peak_mem_gb": 19.21,
+      "final_loss": 4.2889,
+      "profile": {
+        "launches_per_step": 1429.0,
+        "gpu_busy_ms": 98.564,
+        "buckets": {
+          "fusions and other": 33.729,
+          "matmul": 63.529,
+          "memory copies": 1.306
+        }
+      },
+      "hlo": {
+        "fusions": 1425,
+        "fusion_kinds": {
+          "Loop": 542,
+          "Input": 280,
+          "Custom": 603
+        },
+        "custom_calls": {
+          "__cublas$gemm": 2
+        }
+      }
+    }
+  }
+}

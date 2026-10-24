@@ -1,0 +1,4 @@
+small torch.compile:   47.88 ms/step, 171,103 tok/s, MFU 58.0%, 5.49 GB, loss 2.5533
+small Triton kernels:   48.25 ms/step, 169,768 tok/s, MFU 57.3%, 5.16 GB, loss 2.5262
+large torch.compile:   98.8 ms/step, 20,728 tok/s, MFU 51.3%, 16.23 GB, loss 0.0076
+large Triton kernels:   99.88 ms/step, 20,505 tok/s, MFU 50.8%, 16.24 GB, loss 0.0059

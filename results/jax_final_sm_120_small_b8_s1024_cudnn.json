@@ -1,0 +1,254 @@
+{
+  "framework": "jax",
+  "jax": "0.9.2",
+  "arch": "sm_120",
+  "machine_label": "final",
+  "os": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "time": "2026-10-23 22:10:22",
+  "size": "small",
+  "batch": 8,
+  "seq": 1024,
+  "attn": "cudnn",
+  "bf16_ref_tflops": 231.0,
+  "model": {
+    "ms_per_step": 44.48,
+    "tokens_per_s": 184163,
+    "tflops": 141.88,
+    "mfu": 0.6143,
+    "initial_loss": 10.5332,
+    "final_loss": 2.3713,
+    "steps_trained": 28,
+    "loss_finite": true,
+    "compile_s": 6.5,
+    "peak_mem_gb": 6.13
+  },
+  "model_hlo": {
+    "fusion_kinds": {
+      "Loop": 242,
+      "Input": 117,
+      "Custom": 225
+    },
+    "fusions": 584,
+    "custom_calls": {
+      "__cudnn$fmhaSoftmax": 12,
+      "__cudnn$fmhaSoftmaxBackward": 12,
+      "__cublas$gemm": 1
+    },
+    "gemm_fusion_calls": 158,
+    "gemm_fusion_computations": 195,
+    "gemm_fusions_merging_two_weights": 24,
+    "gemm_fusions_with_convert_inside": 0,
+    "standalone_converts": 61,
+    "entry_instructions": 1447,
+    "hlo_chars": 1564797
+  },
+  "profile": {
+    "trace_dir": "profiles/jax_final_small_b8_s1024_cudnn",
+    "steps": 3,
+    "gpu_ms_per_step": 42.768,
+    "kernels_per_step": 646.0,
+    "buckets": {
+      "attention": {
+        "ms_per_step": 4.404,
+        "launches_per_step": 24.0,
+        "pct": 10.3
+      },
+      "fusions and other": {
+        "ms_per_step": 10.776,
+        "launches_per_step": 425.0,
+        "pct": 25.2
+      },
+      "matmul": {
+        "ms_per_step": 26.83,
+        "launches_per_step": 171.0,
+        "pct": 62.73
+      },
+      "memory copies": {
+        "ms_per_step": 0.758,
+        "launches_per_step": 26.0,
+        "pct": 1.77
+      }
+    },
+    "top_kernels": [
+      {
+        "name": "gemm_fusion_dot_244",
+        "bucket": "matmul",
+        "calls_per_step": 12.0,
+        "ms_per_step": 3.2355
+      },
+      {
+        "name": "gemm_fusion_dot_63",
+        "bucket": "matmul",
+        "calls_per_step": 24.0,
+        "ms_per_step": 3.1491
+      },
+      {
+        "name": "gemm_fusion_dot_245",
+        "bucket": "matmul",
+        "calls_per_step": 12.0,
+        "ms_per_step": 3.0024
+      },
+      {
+        "name": "cudnn_generated_fort_native_sdpa_sm80_flash_bprop_wmma_f16_knob_2_64x128x64_1x4x1_cga1x1x1_kernel0_0",
+        "bucket": "attention",
+        "calls_per_step": 12.0,
+        "ms_per_step": 2.9904
+      },
+      {
+        "name": "gemm_fusion_dot_183",
+        "bucket": "matmul",
+        "calls_per_step": 12.0,
+        "ms_per_step": 1.9146
+      },
+      {
+        "name": "gemm_fusion_dot_66",
+        "bucket": "matmul",
+        "calls_per_step": 12.0,
+        "ms_per_step": 1.9018
+      },
+      {
+        "name": "gemm_fusion_dot_61",
+        "bucket": "matmul",
+        "calls_per_step": 1.0,
+        "ms_per_step": 1.8602
+      },
+      {
+        "name": "gemm_fusion_dot_60",
+        "bucket": "matmul",
+        "calls_per_step": 1.0,
+        "ms_per_step": 1.6874
+      },
+      {
+        "name": "void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_128x128_32x4_nt_align8>(cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_128x128_32x4_nt_align8",
+        "bucket": "matmul",
+        "calls_per_step": 1.0,
+        "ms_per_step": 1.6615
+      },
+      {
+        "name": "gemm_fusion_dot",
+        "bucket": "matmul",
+        "calls_per_step": 12.0,
+        "ms_per_step": 1.6315
+      },
+      {
+        "name": "gemm_fusion_dot_185",
+        "bucket": "matmul",
+        "calls_per_step": 12.0,
+        "ms_per_step": 1.6044
+      },
+      {
+        "name": "gemm_fusion_dot_4",
+        "bucket": "matmul",
+        "calls_per_step": 12.0,
+        "ms_per_step": 1.577
+      },
+      {
+        "name": "gemm_fusion_dot_62",
+        "bucket": "matmul",
+        "calls_per_step": 12.0,
+        "ms_per_step": 1.5238
+      },
+      {
+        "name": "cudnn_generated_fort_native_sdpa_sm80_flash_fprop_wmma_f16_knob_1_128x64x64_4x1x1_cga1x1x1_kernel0_0",
+        "bucket": "attention",
+        "calls_per_step": 12.0,
+        "ms_per_step": 1.4132
+      },
+      {
+        "name": "loop_convert_fusion",
+        "bucket": "fusions and other",
+        "calls_per_step": 1.0,
+        "ms_per_step": 1.2764
+      },
+      {
+        "name": "loop_convert_fusion_25",
+        "bucket": "fusions and other",
+        "calls_per_step": 12.0,
+        "ms_per_step": 0.842
+      },
+      {
+        "name": "input_reduce_fusion_3",
+        "bucket": "fusions and other",
+        "calls_per_step": 1.0,
+        "ms_per_step": 0.764
+      },
+      {
+        "name": "loop_transpose_fusion_1",
+        "bucket": "memory copies",
+        "calls_per_step": 12.0,
+        "ms_per_step": 0.6608
+      },
+      {
+        "name": "input_add_convert_reduce_fusion_10",
+        "bucket": "fusions and other",
+        "calls_per_step": 11.0,
+        "ms_per_step": 0.6468
+      },
+      {
+        "name": "gemm_fusion_dot_187",
+        "bucket": "matmul",
+        "calls_per_step": 12.0,
+        "ms_per_step": 0.6348
+      },
+      {
+        "name": "loop_broadcast_fusion_1",
+        "bucket": "fusions and other",
+        "calls_per_step": 1.0,
+        "ms_per_step": 0.6284
+      },
+      {
+        "name": "gemm_fusion_dot_65",
+        "bucket": "matmul",
+        "calls_per_step": 12.0,
+        "ms_per_step": 0.5777
+      },
+      {
+        "name": "gemm_fusion_dot_1",
+        "bucket": "matmul",
+        "calls_per_step": 12.0,
+        "ms_per_step": 0.5612
+      },
+      {
+        "name": "loop_add_subtract_fusion_1",
+        "bucket": "fusions and other",
+        "calls_per_step": 1.0,
+        "ms_per_step": 0.5311
+      },
+      {
+        "name": "loop_convert_fusion_12",
+        "bucket": "fusions and other",
+        "calls_per_step": 12.0,
+        "ms_per_step": 0.4989
+      }
+    ]
+  },
+  "block": {
+    "ms": 3.6087,
+    "hlo": {
+      "fusion_kinds": {
+        "Input": 6,
+        "Loop": 16,
+        "Custom": 18
+      },
+      "fusions": 40,
+      "custom_calls": {
+        "__cudnn$fmhaSoftmax": 1,
+        "__cublas$gemm": 1,
+        "__cudnn$fmhaSoftmaxBackward": 1
+      },
+      "gemm_fusion_calls": 11,
+      "gemm_fusion_computations": 13,
+      "gemm_fusions_merging_two_weights": 2,
+      "gemm_fusions_with_convert_inside": 3,
+      "standalone_converts": 5,
+      "entry_instructions": 80,
+      "hlo_chars": 88346
+    }
+  },
+  "optimizer": {
+    "ms": 3.811,
+    "params": 134105856,
+    "fusions": 89,
+    "gbs": 985.4
+  }
+}

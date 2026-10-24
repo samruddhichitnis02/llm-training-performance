@@ -1,0 +1,3 @@
+Saved jax_vs_pytorch_final.png
+step ms: {'small': (47.88, 48.25, 44.48), 'medium': (80.67, 82.49, 69.01), 'large': (98.8, 99.88, 85.19)}
+medium buckets, PyTorch Triton vs JAX: {'matmul': (55.3161, 44.358), 'attention': (5.7513, 6.696), 'optimizer': (7.3263, 8.962), 'elementwise and copies': (8.35, 5.638)}

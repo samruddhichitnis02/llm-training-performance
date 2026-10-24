@@ -1,0 +1,11 @@
+jax 0.9.2 on sm_120 (final) | medium_b4_s1024_naive
+bf16 matmul peak reached this run: 209.5 TFLOPs
+model step: 91.13 ms, 44,945 tok/s, MFU 50.4%, loss 3.6801, compile 11.2 s, 1449 fusions, custom calls {'__cublas$gemm': 2}
+profile: 1453.0 kernels per step, 88.76 ms GPU per step
+  fusions and other    27.141 ms     821 launches   30.6%
+  matmul               59.902 ms     459 launches   67.5%
+  memory copies         1.717 ms     173 launches    1.9%
+block fwd+bwd: 4.675 ms, 53 fusions, custom calls {}
+AdamW alone: 8.626 ms for 374M params in 173 fusions (1213.6 GB/s at 28 bytes per param)
+GEMM fusion calls: 457 (481 distinct), merging two weight matrices into one GEMM: 48, with a convert inside: 0, standalone convert kernels: 121
+Saved jax_final_sm_120_medium_b4_s1024_naive.json

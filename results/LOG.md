@@ -487,3 +487,83 @@ Built from source: analytical network backend, commit `4ce9ecfe746a3ee5fe47559a1
 Known issue: this ASTRA-sim build sometimes crashes (`malloc_consolidate`, or a segfault) while printing statistics at shutdown, after the simulation has finished. Results are kept only when every pipeline stage reported and all reporting ranks of a stage agree to the tick. The JSON records `ranks_reported` for every run. It changes from run to run (24 to 30 of 32 for the Llama runs), but the simulated step times are identical every time, to the nanosecond.
 
 Also found: ASTRA-sim's roofline computes `num_ops / min(peak, bw x num_ops / tensor_size)`, which divides zero by zero for a pure memory op with `num_ops = 0`. The first roofline runs hit an assertion. Memory ops now carry `num_ops = 1` in the `.et` file, which gives the correct `tensor_size / bandwidth`. The JSON keeps the exact FLOPs.
+
+## Milestone 9: JAX port
+
+Code: `jax_port/block_jax.py` (the full model and training step in JAX with `jax.jit`, AdamW written out, timing, XLA HLO analysis, `jax.profiler` buckets), `jax_port/compare.py` (parity, GEMM study, block and step comparison against PyTorch in the same session), `jax_port/plot_compare.py`. Console output: `milestones/m9_*.txt`. Chart: `jax_vs_pytorch_final.png`.
+
+Setup: JAX 0.9.2 with the CUDA 12 plugin, in its own venv (`~/venvs/jax`), because JAX's CUDA wheels pin NVIDIA library versions that differ from PyTorch's. JAX 0.12.0.1 was tried first and could not allocate any single buffer over about 4 GB on this WSL2 machine, even on an empty 32 GB card and with every allocator setting (default, `platform`, `cuda_malloc_async`, mem fraction 0.95), while PyTorch allocated 16 GB in one piece. This matches a reported regression since JAX 0.10 on WSL2 (jax-ml/jax issue 41448). 0.9.2 allocates normally and supports `sm_120`.
+
+### Parity
+
+Source: `milestones/m9_compare_medium.txt`. One transformer block, weights copied from the PyTorch block, bf16 autocast in PyTorch and the same mixed precision in JAX. The output and every gradient match within bf16 rounding (tolerance 3e-2):
+
+| Output | Rel. error | Gradient | Rel. error |
+|---|---|---|---|
+| block output | 9.6e-4 | input | 1.5e-3 |
+| | | qkv, wo, w1, w3, w2 weights | 3.7e-3 to 4.5e-3 |
+| | | norm1, norm2 weights | 4.3e-3 to 4.4e-3 |
+
+### Full training step
+
+Same model, shapes, precision, fused attention and AdamW settings in both frameworks. PyTorch rows were measured in this session. JAX attention is cuDNN's fused kernel (`jax.nn.dot_product_attention(implementation="cudnn")`).
+
+| Size | PyTorch eager (row 4) | torch.compile (row 5) | Triton kernels (row 6) | JAX jit | JAX vs best PyTorch |
+|---|---|---|---|---|---|
+| small, b8 s1024 | | 47.88 ms, 58.0% | 48.25 ms, 57.3% | **44.48 ms, 61.4%** | 1.08x |
+| medium, b4 s1024 | 104.95 ms, 40.8% | 80.67 ms, 53.1% | 82.49 ms, 51.9% | **69.01 ms, 60.8%** | 1.17x |
+| large, b2 s1024 | | 98.80 ms, 51.3% | 99.88 ms, 50.8% | **85.19 ms, 58.9%** | 1.16x |
+
+(ms per step and MFU against the bf16 peak measured in the same run.) Peak memory for `medium`: JAX 9.65 GB, torch.compile 9.75 GB, Triton kernels 9.63 GB.
+
+JAX is 8 to 17% faster than the best PyTorch configuration at every size.
+
+### Where the time goes (medium)
+
+| GPU ms per step | PyTorch Triton kernels | JAX jit |
+|---|---|---|
+| matmul | 55.3 | 44.4 |
+| attention | 5.8 | 6.7 |
+| optimizer | 7.3 | 9.0 (AdamW timed alone) |
+| elementwise and copies | 8.3 | 5.6 |
+| kernels per step | 1177 | 1259 |
+
+The difference is almost all in the matmuls: 11 ms of the 13 ms gap.
+
+### Why: XLA's GEMMs, not its elementwise fusion
+
+`milestones/m9_compare_medium.txt`, GEMMs alone at the model's shapes, bf16:
+
+| GEMM | M x N x K | PyTorch (cuBLAS) | XLA | XLA speedup |
+|---|---|---|---|---|
+| qkv forward | 4096 x 3072 x 1024 | 165.8 TFLOPs | 185.9 TFLOPs | 1.12x |
+| w1/w3 forward | 4096 x 2816 x 1024 | 152.3 | 173.0 | 1.14x |
+| w2 forward | 4096 x 1024 x 2816 | 169.9 | 171.5 | 1.01x |
+| **w1/w3 weight gradient** | 2816 x 1024 x 4096 | **119.6** | **171.0** | **1.43x** |
+| **qkv weight gradient** | 3072 x 1024 x 4096 | **130.0** | **184.0** | **1.42x** |
+| wo forward | 4096 x 1024 x 1024 | 159.4 | 125.7 | 0.79x |
+| lm head | 4096 x 32000 x 1024 | 216.5 | 218.9 | 1.01x |
+
+1. **XLA does not use cuBLAS for these GEMMs.** In the compiled step, 313 GEMMs are XLA's own autotuned Triton GEMM fusions (`gemm_fusion_dot_*`), and only 2 are cuBLAS calls. PyTorch, eager or with `torch.compile`, sends every matmul to cuBLAS, which picks Ampere generation `cutlass_80` kernels on this GPU (milestone 2).
+2. **The weight gradient GEMMs show the biggest gap.** With the token dimension (4096) as the contraction dimension, cuBLAS's choice reaches only 120 to 130 TFLOPs. XLA's autotuned kernel reaches 171 to 184. The perf model's shape calibration measures the same shapes in their real transposed layout at 195 us in cuBLAS, against about 140 us in XLA. Over the 5 linears in 24 layers, that is most of the 11 ms.
+3. **XLA merges sibling GEMMs.** `w1` and `w3` read the same input, so XLA concatenates their weights and runs one GEMM of width 2 x ffn, in the forward and in the backward (48 merged GEMM fusions for 24 layers). PyTorch, `torch.compile` included, and the hand written path all launch two.
+4. **Weight casts are not fused into the GEMMs.** As in PyTorch autocast, the fp32 to bf16 weight casts are separate kernels (121 standalone convert fusions). Only XLA's own attention lowering fuses converts into its GEMMs.
+5. **Elementwise fusion is a draw.** XLA's 795 loop and reduction fusions cost 5.6 ms. That is less than the hand written kernels' 8.3 ms (whose remainder is mostly casts and residual adds) and about what `torch.compile` gets (milestone 2: 1.8 ms elementwise plus 6.3 ms copies). Neither compiler does better than the Triton kernels by much on the ops those kernels cover.
+6. **The hand written optimizer beats XLA's.** PyTorch's fused Adam takes 7.3 ms. XLA's AdamW takes 9.0 ms in 173 fusions (1168 GB/s against about 1430 GB/s). A fused optimizer kernel is a fusion XLA does not find on its own.
+
+### Attention choices in JAX
+
+| `medium`, JAX | ms/step | MFU | Peak GB |
+|---|---|---|---|
+| cuDNN fused attention | 69.01 | 60.8% | 9.65 |
+| naive (scores, mask, softmax written out) | 91.13 | 50.4% | |
+| `implementation="xla"` (XLA's own lowering) | 98.84 | 42.3% | 19.21 |
+
+XLA's own lowering of `dot_product_attention` does not produce a flash style kernel. It materializes the scores, uses twice the memory of the cuDNN path, and is slower than the naive version. Fused attention comes from cuDNN (`__cudnn$fmhaSoftmax` custom calls), not from XLA fusion. PyTorch's SDPA likewise calls a flash kernel library.
+
+### Notes
+
+- Compile time: 6.5 to 7.9 s for the full step under `jax.jit` (11 s with naive or XLA attention), including XLA's GEMM autotuning. The hand written Triton path pays about 0.45 s on its first step (the milestone 4 Nsight trace). `torch.compile`'s compile time was not measured separately; it falls inside the benchmark's warmup steps.
+- The single block, forward plus backward, takes about 2.6 to 3.1 ms in JAX, and 3.07 ms (Triton kernels) to 3.92 ms (eager) in PyTorch. It is too short to time reliably with a sync per call under WSL2, so the full step numbers are the reliable comparison.
+- The first AdamW timing (14.8 ms in one run) copied the whole parameter tree first and fragmented memory. That copy also made the `large` run fail with an out of memory error. The optimizer test now reuses the training state's own buffers: 8.96 ms for `medium`, 19.8 ms for `large`.
+- The JAX profiler traces go to `profiles/jax_<label>_<config>/` (not committed). They were cleared after these runs and are recreated by running `block_jax.py` again.

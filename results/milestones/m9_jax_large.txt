@@ -1,0 +1,12 @@
+jax 0.9.2 on sm_120 (final) | large_b2_s1024_cudnn
+bf16 matmul peak reached this run: 230.6 TFLOPs
+model step: 85.19 ms, 24,041 tok/s, MFU 58.9%, loss 0.0078, compile 7.1 s, 767 fusions, custom calls {'__cudnn$fmhaSoftmax': 16, '__cublas$gemm': 2, '__cudnn$fmhaSoftmaxBackward': 16}
+profile: 851.0 kernels per step, 82.814 ms GPU per step
+  attention             4.067 ms      32 launches    4.9%
+  fusions and other    24.047 ms     557 launches   29.0%
+  matmul               54.381 ms     227 launches   65.7%
+  memory copies         0.319 ms      35 launches    0.4%
+block fwd+bwd: 4.676 ms, 40 fusions, custom calls {'__cudnn$fmhaSoftmax': 1, '__cudnn$fmhaSoftmaxBackward': 1}
+AdamW alone: 19.829 ms for 941M params in 117 fusions (1328.2 GB/s at 28 bytes per param)
+GEMM fusion calls: 209 (225 distinct), merging two weight matrices into one GEMM: 32, with a convert inside: 0, standalone convert kernels: 81
+Saved jax_final_sm_120_large_b2_s1024_cudnn.json

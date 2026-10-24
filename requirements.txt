@@ -11,6 +11,9 @@ python-dotenv==1.2.4
 pytest==9.1.1
 # Optional, used by the CUDA C++ extension build:
 #   ninja==1.13.0
+# JAX port (jax_port/): a separate venv, because JAX's CUDA wheels pin their own NVIDIA
+# libraries. 0.9.2 on purpose: on WSL2, JAX 0.10 and newer cannot allocate a buffer over ~4 GB.
+#   python3 -m venv ~/venvs/jax && ~/venvs/jax/bin/pip install "jax[cuda12]==0.9.2" numpy==2.5.4 tabulate==0.10.0 matplotlib==3.11.2
 # Optional, only to decode the Chakra export with the official MLCommons protobuf classes
 # (workload_export/check_export.py skips that check without it):
 #   chakra @ git+https://github.com/mlcommons/chakra.git@ce00f3fb4a2be48fa061f5eff25d236ab341d1a3
