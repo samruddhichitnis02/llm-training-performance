@@ -37,7 +37,7 @@ A real training step (forward, backward, AdamW update) on one fixed batch of ran
 | 8 + FP8 linears (e4m3) | **44.67** | **5.24x** | **64.5%** | **71.40** | **4.68x** | **62.5%** |
 | 9 + NVFP4 linears (e2m1) | 50.76 | 4.61x | 56.7% | 84.66 | 3.94x | 52.7% |
 
-Source: `results/milestones/m5_sweep_final_sm_120_*_b*_s1024.json`, all rows from one run. Peak memory falls from 15.9 GB to 4.7 GB on `small`. All losses stay finite.
+Source: `results/milestones/m5_sweep_final_sm_120_*_b*_s1024.json`, all rows from one run. Peak memory falls from 15.9 GB to 4.7 GB on `small` with FP8 (4.4 GB with NVFP4). All losses stay finite.
 
 - Fused attention is the biggest single step. Naive attention keeps several copies of a 1024 by 1024 score matrix per head, and SDPA's flash kernel never writes it, halving the step time and saving 7 to 9 GB.
 - bf16 alone gives only 1.4x even though bf16 matmuls run 3.5x faster than fp32. Most of the step was not matmul yet.
@@ -162,12 +162,16 @@ GEMM and attention calls use times measured at their exact shapes on this GPU. T
 | optimizer (grows with parameters: 18.3 ms on `large`) | 7.3 |
 | attention | 7.2 |
 | launch gaps | 1.0 |
+| residual (measured minus modeled; the model overshoots some categories) | -8.4 |
+| measured step | 81.6 |
+
+The categories are modeled estimates from the calibrated performance model, so they sum to 90.1 ms; the negative residual brings the total back to the measured 81.6 ms (`results/milestones/m6_validate.txt`).
 
 **What if**, `medium` fused: doubling memory bandwidth gives -12.4%, doubling the matmul peak -37.0%, removing launch cost -1.2%. For the unfused model, doubling bandwidth gives -18.7%. Fusion moved the step from bandwidth bound to compute bound.
 
 ## 6. Scaling predictions
 
-**This section is a prediction.** Only one GPU was available, so no NCCL all reduce could be timed. The link constants in [`perf_model/links.json`](perf_model/links.json) are effective bandwidths for NVLink 4 class links (360 GB/s per GPU), PCIe Gen5 without peer access (25 GB/s) and 400 Gb/s InfiniBand (45 GB/s), each with its source, meant to be replaced by measured `nccl-tests` numbers.
+**This section is a prediction.** Only one GPU was available, so no NCCL all reduce could be timed. The link constants in [`perf_model/links.json`](perf_model/links.json) are effective bandwidths for NVLink 4 class links (360 GB/s per GPU), PCIe Gen5 without peer access (25 GB/s) and 400 Gb/s InfiniBand (45 GB/s), each with its source, meant to be replaced by measured `nccl-tests` numbers. The GPU measured here has no NVLink, so the NVLink rows describe a hypothetical cluster of GPUs with this compute and 32 GB memory; the PCIe rows are the case that applies to this card.
 
 `perf_model/scaling.py` takes compute per GPU from the validated performance model on the sharded shapes (all 1422 sharded GEMM and attention shapes timed on this GPU). On top of that it models:
 
@@ -230,7 +234,9 @@ Two independent tools agree within 16% on the same workload. ASTRA-sim's own roo
 | `medium` b4 | 80.67 ms, 53.1% | 82.49 ms, 51.9% | **69.01 ms, 60.8%** |
 | `large` b2 | 98.80 ms, 51.3% | 99.88 ms, 50.8% | **85.19 ms, 58.9%** |
 
-JAX is 8 to 17% faster, and 11 of the 13 ms gap on `medium` is matmul time. The differences in fusion:
+The PyTorch and JAX columns come from separate runs (JAX: `results/milestones/m9_jax_*.txt`, PyTorch: `m9_compare_medium.txt` and `m9_pytorch_small_large.txt`). In the single `compare.py` run that timed both on `medium`, JAX took 70.61 ms (59.3% MFU), 1.14x faster than `torch.compile` instead of 1.17x.
+
+JAX is 1.08x to 1.17x faster than the best PyTorch configuration in the table (1.14x on `medium` when both are timed in the same run). On `medium`, about 11 ms of the 12 to 13.5 ms gap to the Triton kernels is matmul time. The differences in fusion:
 
 - **GEMMs:** XLA generates and autotunes its own Triton GEMM kernels (313 per step, 2 cuBLAS calls), while PyTorch sends every matmul to cuBLAS. For the weight gradient GEMMs, where the token dimension is contracted, XLA's kernels are 1.43x faster (171 against 120 TFLOPs).
 - **Sibling GEMMs:** XLA merges the gate and up projections, which share an input, into one GEMM. Neither `torch.compile` nor the hand written path does.
@@ -299,7 +305,7 @@ One NVIDIA Blackwell GPU, architecture `sm_120`, compute capability 12.0, 32 GB,
 - **Synthetic data.** Training uses one fixed batch of random tokens. Step speed does not depend on the data, but the loss curves are a memorization test, not evidence about convergence on real data.
 - **NVFP4 is not faster yet.** Its GEMMs are 5.6x faster, but quantization and launch overhead cancel the gain at these model sizes. The recipe also leaves out random Hadamard transforms and 2D weight blocks.
 - **FP8 without Transformer Engine.** The FP8 and NVFP4 paths are written directly on `torch._scaled_mm`.
-- **Run to run variation.** Step times varied by up to about 6% between sessions from the GPU's clock state. Rows that are compared directly were always measured in the same run.
+- **Run to run variation.** Step times varied by up to about 6% between sessions from the GPU's clock state. Rows within the ladder table and within the kernel ablation were measured in the same run. Other tables combine runs from different sessions: the profiler columns, the FP8/NVFP4 GPU times (from separate profiler runs) and the PyTorch against JAX comparison (see section 8).
 - **The performance model is calibrated on this GPU.** Predictions for other GPUs need their own calibration file and GEMM shape timings.
 - **ASTRA-sim shutdown crash.** This ASTRA-sim build sometimes crashes while printing statistics after the simulation has finished. Results are kept only when every pipeline stage reported and its ranks agree to the tick.
 
