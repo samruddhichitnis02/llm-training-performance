@@ -1,4 +1,4 @@
-# llm-training-perf
+# llm-training-performance
 
 Performance engineering for LLM training on an NVIDIA Blackwell GPU (`sm_120`). It takes a Llama style model from a plain PyTorch fp32 baseline at 12% MFU to 64% MFU (5.24x faster) by profiling the training step, writing fused Triton and CUDA C++ kernels with forward and backward passes, and training the block GEMMs in FP8, with NVFP4 (4 bit) measured alongside. A roofline performance model predicts the step time within 4.6% mean error (2.7% on held out shapes), and the same model drives a data, tensor and pipeline parallel scaling model up to 4096 GPUs, a Chakra workload export run in ASTRA-sim, and a comparison with a JAX port.
 
